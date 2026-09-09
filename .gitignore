@@ -1,84 +1,54 @@
-# This file is used to ignore files which are generated
-# ----------------------------------------------------------------------------
+# Dependencies and generated application bundles
+node_modules/
+/dist/
+/dist-electron/
+/out/
+/release/
 
+# Local database contents and SQLite sidecar files
+/backend/db/data/
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite-journal
+*.sqlite3-wal
+*.sqlite3-shm
+*.sqlite3-journal
+*.db-wal
+*.db-shm
+*.db-journal
+
+# Local documentation and automated tests
+/playwright.config.js
+/tests/
+/docs/
+
+# Generated test reports, screenshots, traces, and coverage
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/coverage/
+/.nyc_output/
+
+# Temporary exports and debugging scratch files
+/tmp/
+/temp/
+/output/
+/exports/
+*.tmp
+*.temp
+
+# Local environment overrides and logs
+.env
+.env.*
+!.env.example
+!.env.*.example
+/logs/
+*.log
+
+# Editor and operating-system metadata
+*.swp
+*.swo
 *~
-*.autosave
-*.a
-*.core
-*.moc
-*.o
-*.obj
-*.orig
-*.rej
-*.so
-*.so.*
-*_pch.h.cpp
-*_resource.rc
-*.qm
-.#*
-*.*#
-core
-!core/
-tags
 .DS_Store
-.directory
-*.debug
-Makefile*
-*.prl
-*.app
-moc_*.cpp
-ui_*.h
-qrc_*.cpp
 Thumbs.db
-*.res
-*.rc
-/.qmake.cache
-/.qmake.stash
-**/.qmlls.ini
-
-# qtcreator generated files
-*.pro.user*
-*.qbs.user*
-CMakeLists.txt.user*
-
-# xemacs temporary files
-*.flc
-
-# Vim temporary files
-.*.swp
-
-# Visual Studio generated files
-*.ib_pdb_index
-*.idb
-*.ilk
-*.pdb
-*.sln
-*.suo
-*.vcproj
-*vcproj.*.*.user
-*.ncb
-*.sdf
-*.opensdf
-*.vcxproj
-*vcxproj.*
-
-# MinGW generated files
-*.Debug
-*.Release
-
-# Python byte code
-*.pyc
-
-# Binaries
-# --------
-*.dll
-*.exe
-
-# Directories with generated files
-.moc/
-.obj/
-.pch/
-.rcc/
-.uic/
-/build*/
-/.qtcreator/
