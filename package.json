@@ -1,8 +1,10 @@
 {
   "name": "spn-skid-designer",
   "version": "1.0.0",
+  "description": "Local pH correction skid designer with SQLite storage and PDF reports",
   "private": true,
   "type": "module",
+  "main": "electron/main.js",
   "engines": {
     "node": ">=24.0.0"
   },
@@ -10,6 +12,9 @@
     "dev": "concurrently -k -n api,web \"node --watch backend/index.js\" \"vite\"",
     "build": "vite build",
     "start": "node backend/index.js",
+    "desktop": "npm run build && electron .",
+    "desktop:test": "npm run build && electron . --test-tools",
+    "build:exe": "npm run build && electron-builder --win portable --x64 --publish never",
     "test": "node --test tests/*.test.js",
     "test:e2e": "playwright test",
     "format": "prettier --write frontend/src backend tests *.js"
@@ -22,10 +27,34 @@
     "react-router-dom": "^7.18.4",
     "zod": "^4.6.5"
   },
+  "build": {
+    "appId": "com.spn.skiddesigner",
+    "productName": "SPN Skid Designer",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "backend/**/*",
+      "!backend/db/data/**/*",
+      "shared/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "asar": true,
+    "npmRebuild": false,
+    "win": {
+      "target": "portable",
+      "signAndEditExecutable": false
+    },
+    "artifactName": "SPN-Skid-Designer-${version}-portable.${ext}"
+  },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
     "@vitejs/plugin-react": "^6.1.1",
     "concurrently": "^10.0.5",
+    "electron": "44.4.3",
+    "electron-builder": "26.15.3",
     "prettier": "^3.9.8",
     "vite": "^8.3.0"
   }

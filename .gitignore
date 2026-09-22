@@ -7,6 +7,7 @@ node_modules/
 
 # Local database contents and SQLite sidecar files
 /backend/db/data/
+/data/
 *.sqlite-wal
 *.sqlite-shm
 *.sqlite-journal
