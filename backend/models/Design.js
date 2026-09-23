@@ -42,3 +42,20 @@ export class Design {
     if (!inputsOnly) this.generated = generateOutputs(inputs);
   }
 }
+
+// Input-only designs (older saves, or imports) share normal calculations.
+// Reads never write generated outputs back or change the revision of the
+// design they were computed from.
+export function withOutputs(design) {
+  if (design.generated) return design;
+  try {
+    return {
+      ...design,
+      generated: generateOutputs(validateInputs(design.inputs)),
+    };
+  } catch (error) {
+    if (error.fields)
+      error.message = `${design.designName}: ${Object.values(error.fields).join(" ")}`;
+    throw error;
+  }
+}

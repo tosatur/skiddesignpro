@@ -5,9 +5,10 @@ node_modules/
 /out/
 /release/
 
-# Local database contents and SQLite sidecar files
+# Local saved-design data (one JSON file per design)
 /backend/db/data/
 /data/
+# Leftover SQLite sidecar files from before the file-based storage switch
 *.sqlite-wal
 *.sqlite-shm
 *.sqlite-journal

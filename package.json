@@ -1,7 +1,7 @@
 {
   "name": "spn-skid-designer",
   "version": "1.0.0",
-  "description": "Local pH correction skid designer with SQLite storage and PDF reports",
+  "description": "Local pH correction skid designer with file-based storage and PDF reports",
   "private": true,
   "type": "module",
   "main": "electron/main.js",

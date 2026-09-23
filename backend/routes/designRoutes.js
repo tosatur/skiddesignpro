@@ -1,27 +1,10 @@
 import { Router } from "express";
-import { Design, generateOutputs } from "../models/Design.js";
+import { Design, withOutputs } from "../models/Design.js";
 import { buildReport } from "../services/report.js";
 import { buildReportText } from "../services/reportText.js";
 import { generateReportPDF } from "../services/reportPdf.js";
 import { designDisplay } from "../services/designDisplay.js";
 import { exactSulphurTotal } from "../../shared/measurements.js";
-import { validateInputs } from "../services/validation.js";
-
-// Input-only imports share normal storage and calculations. Reads never write
-// generated outputs back or change the revision of an imported design.
-const withOutputs = (design) => {
-  if (design.generated) return design;
-  try {
-    return {
-      ...design,
-      generated: generateOutputs(validateInputs(design.inputs)),
-    };
-  } catch (error) {
-    if (error.fields)
-      error.message = `${design.designName}: ${Object.values(error.fields).join(" ")}`;
-    throw error;
-  }
-};
 
 export function designRoutes(store, { testToolsEnabled = false } = {}) {
   const router = Router();

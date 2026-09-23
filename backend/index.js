@@ -4,7 +4,7 @@ import { DesignStore } from "./db/DesignStore.js";
 
 const store = new DesignStore(
   process.env.SPN_DATABASE ||
-    fileURLToPath(new URL("./db/data/designs.sqlite", import.meta.url)),
+    fileURLToPath(new URL("./db/data", import.meta.url)),
 );
 const port = Number(process.env.PORT || 3001);
 const server = createApp(store).listen(port, "127.0.0.1", () =>

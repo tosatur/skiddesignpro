@@ -1,15 +1,49 @@
-import { app, BrowserWindow, dialog, Menu, shell } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, Menu, shell } from "electron";
 import { once } from "node:events";
-import { dirname, join } from "node:path";
+import { readFileSync } from "node:fs";
+import { basename, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { createApp } from "../backend/app.js";
 import { DesignStore } from "../backend/db/DesignStore.js";
+import { atomicWriteFile } from "../backend/util/atomicWrite.js";
 import { desktopDatabasePath } from "./databasePath.js";
+import { listRecent, removeRecent, touchRecent } from "./recentFiles.js";
+
+const DESIGN_FILE_FILTERS = [{ name: "SPN Design", extensions: ["spnd"] }];
 
 let window;
 let server;
 let store;
 let databasePath;
+let recentFilesPath;
 let closing = false;
+
+function recentEntry(path, design) {
+  return {
+    path,
+    designName: design.designName,
+    clientName: design.clientName,
+    updatedAt: design.updatedAt,
+  };
+}
+
+function openDesignAtPath(path) {
+  let design;
+  try {
+    design = JSON.parse(readFileSync(path, "utf8"));
+  } catch (error) {
+    removeRecent(recentFilesPath, path);
+    throw new Error(`Could not open "${basename(path)}": ${error.message}`);
+  }
+  touchRecent(recentFilesPath, recentEntry(path, design));
+  return { path, design };
+}
+
+function saveDesignAtPath(path, design) {
+  atomicWriteFile(path, JSON.stringify(design));
+  touchRecent(recentFilesPath, recentEntry(path, design));
+  return { path };
+}
 
 async function startDesktop() {
   const testToolsEnabled =
@@ -26,6 +60,7 @@ async function startDesktop() {
     databaseOverride: process.env.SPN_DATABASE,
   });
   store = new DesignStore(databasePath);
+  recentFilesPath = join(app.getPath("userData"), "recent-designs.json");
   server = createApp(store, { testToolsEnabled }).listen(0, "127.0.0.1");
   await once(server, "listening");
   const origin = `http://127.0.0.1:${server.address().port}`;
@@ -44,6 +79,7 @@ async function startDesktop() {
       nodeIntegration: false,
       contextIsolation: true,
       sandbox: true,
+      preload: fileURLToPath(new URL("./preload.cjs", import.meta.url)),
     },
   });
   if (testToolsEnabled) {
@@ -76,6 +112,42 @@ async function startDesktop() {
     });
   });
 
+  const defaultDesignDir =
+    databasePath !== ":memory:" ? databasePath : app.getPath("documents");
+
+  ipcMain.handle("design:open", async () => {
+    const result = await dialog.showOpenDialog(window, {
+      title: "Open design",
+      defaultPath: defaultDesignDir,
+      filters: DESIGN_FILE_FILTERS,
+      properties: ["openFile"],
+    });
+    return result.canceled ? null : openDesignAtPath(result.filePaths[0]);
+  });
+  ipcMain.handle("design:open-path", (_event, path) => openDesignAtPath(path));
+  ipcMain.handle("design:save", (_event, design, path) =>
+    saveDesignAtPath(path, design),
+  );
+  ipcMain.handle("design:save-as", async (_event, design, suggestedName) => {
+    const safeName = (suggestedName || "SPN-design").replace(
+      /[\\/:*?"<>|]/g,
+      "-",
+    );
+    const result = await dialog.showSaveDialog(window, {
+      title: "Save design as",
+      defaultPath: join(defaultDesignDir, `${safeName}.spnd`),
+      filters: DESIGN_FILE_FILTERS,
+    });
+    return result.canceled
+      ? null
+      : saveDesignAtPath(result.filePath, design);
+  });
+  ipcMain.handle("recent:list", () => listRecent(recentFilesPath));
+  ipcMain.handle("recent:remove", (_event, path) => {
+    removeRecent(recentFilesPath, path);
+    return listRecent(recentFilesPath);
+  });
+
   Menu.setApplicationMenu(
     Menu.buildFromTemplate([
       {
@@ -85,7 +157,7 @@ async function startDesktop() {
             label: "Open data folder",
             enabled: databasePath !== ":memory:",
             click: async () => {
-              const error = await shell.openPath(dirname(databasePath));
+              const error = await shell.openPath(databasePath);
               if (error)
                 dialog.showErrorBox("Could not open data folder", error);
             },
@@ -138,7 +210,7 @@ if (!app.requestSingleInstanceLock()) {
     .catch((error) => {
       dialog.showErrorBox(
         "SPN Skid Designer could not start",
-        `${error.message}\n\nDatabase: ${databasePath || "not opened"}\n\nKeep the portable EXE and its data folder in a writable location, or set SPN_DATABASE to another SQLite file.`,
+        `${error.message}\n\nData folder: ${databasePath || "not opened"}\n\nKeep the portable EXE and its data folder in a writable location, or set SPN_DATABASE to another folder.`,
       );
       if (!server) store?.close();
       app.quit();
