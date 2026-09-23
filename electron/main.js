@@ -33,7 +33,11 @@ function openDesignAtPath(path) {
     design = JSON.parse(readFileSync(path, "utf8"));
   } catch (error) {
     removeRecent(recentFilesPath, path);
-    throw new Error(`Could not open "${basename(path)}": ${error.message}`);
+    const reason =
+      error.code === "ENOENT"
+        ? "it may have been moved, renamed, or deleted"
+        : "the file may be damaged or not a valid design file";
+    throw new Error(`Could not open "${basename(path)}" — ${reason}.`);
   }
   touchRecent(recentFilesPath, recentEntry(path, design));
   return { path, design };
@@ -154,12 +158,15 @@ async function startDesktop() {
         label: "File",
         submenu: [
           {
-            label: "Open data folder",
+            label: "Open default save folder",
             enabled: databasePath !== ":memory:",
             click: async () => {
               const error = await shell.openPath(databasePath);
               if (error)
-                dialog.showErrorBox("Could not open data folder", error);
+                dialog.showErrorBox(
+                  "Could not open default save folder",
+                  error,
+                );
             },
           },
           { type: "separator" },

@@ -1,12 +1,15 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { designService } from "../services/designService.js";
+import { isDesktop } from "../services/desktopDocuments.js";
 
 export default function DeleteDesignAction({ design }) {
   const dialog = useRef(null);
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const desktop = isDesktop();
+  const label = desktop ? "Remove from Recent" : "Delete Design";
 
   async function remove() {
     setBusy(true);
@@ -31,7 +34,7 @@ export default function DeleteDesignAction({ design }) {
           dialog.current.showModal();
         }}
       >
-        Delete Design
+        {label}
       </button>
       <dialog
         ref={dialog}
@@ -42,8 +45,14 @@ export default function DeleteDesignAction({ design }) {
           if (busy) event.preventDefault();
         }}
       >
-        <h2 id="delete-design-title">Delete “{design.designName}”?</h2>
-        <p id="delete-design-note">This action cannot be undone.</p>
+        <h2 id="delete-design-title">
+          {desktop ? "Remove" : "Delete"} “{design.designName}”?
+        </h2>
+        <p id="delete-design-note">
+          {desktop
+            ? "This removes it from Recent files here. The file itself is not deleted."
+            : "This action cannot be undone."}
+        </p>
         {error && (
           <div className="notice error" role="alert">
             {error}
@@ -65,7 +74,7 @@ export default function DeleteDesignAction({ design }) {
             onClick={remove}
             disabled={busy}
           >
-            {busy ? "Deleting…" : "Delete Design"}
+            {busy ? (desktop ? "Removing…" : "Deleting…") : label}
           </button>
         </div>
       </dialog>

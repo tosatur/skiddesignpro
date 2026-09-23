@@ -50,7 +50,7 @@ npm start
 Each design is its own `.spnd` file (plain JSON internally), named by its internal ID.
 
 - **Web app:** `backend/db/data/` inside this project.
-- **Either EXE:** `data/` beside that EXE. **File → Open data folder** shows the location.
+- **Either EXE:** `data/` beside that EXE by default — this is only the starting folder Open/Save dialogs suggest, since designs can be saved anywhere. **File → Open default save folder** shows the location.
 
 Keep each EXE in its own writable folder to separate normal and dev data. The build already does this: normal data goes in `release/data`, and dev data in `release/dev/data`. Putting both EXEs together makes them share the same data folder.
 
