@@ -1,4 +1,34 @@
 :root {
+  color-scheme: light;
+
+  /* Color tokens. Light palette only for now — kept as tokens (not
+     literals) so a dark theme is a values swap later, not a rewrite. */
+  --color-bg: #eef0f2;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f3f5f7;
+  --color-border: #c9ced5;
+  --color-border-subtle: #dde1e6;
+  --color-text: #1d2024;
+  --color-text-muted: #5c6672;
+  --color-text-faint: #838d99;
+  --color-accent: #3d5a73;
+  --color-accent-hover: #2e4459;
+  --color-accent-contrast: #ffffff;
+  --color-danger: #93342a;
+  --color-danger-hover: #7a2c23;
+  --color-focus: #5c6672;
+  --color-status-ok-bg: #e2ebe3;
+  --color-status-ok-text: #33553f;
+  --color-status-bad-bg: #f3e3df;
+  --color-status-bad-text: #93342a;
+  --color-status-neutral-bg: #e9ecef;
+  --color-status-neutral-text: #5c6672;
+
+  /* Shape and type tokens. */
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --font-body: "Segoe UI", "Segoe UI Web", system-ui, -apple-system, sans-serif;
+
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: #23252a;
   background: #f8f9fb;
