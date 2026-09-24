@@ -231,14 +231,6 @@ main:focus {
   justify-content: flex-end;
   padding: 6px 0 20px;
 }
-.home-intro {
-  padding: 35px 0 36px;
-}
-.home-intro h1 {
-  font-size: 54px;
-  margin-bottom: 12px;
-  letter-spacing: -2px;
-}
 .designs-card {
   padding: 28px;
 }
@@ -702,12 +694,6 @@ dd {
   }
   .header-inner {
     padding: 0 20px;
-  }
-  .home-intro {
-    padding: 20px 0 28px;
-  }
-  .home-intro h1 {
-    font-size: 40px;
   }
   .designs-card {
     padding: 20px;

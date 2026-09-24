@@ -70,12 +70,9 @@ export default function HomePage() {
 
   return (
     <>
-      <section className="home-intro">
-        <h1>Your designs.</h1>
-        <p className="lede">
-          Create, manage and review your saved pH correction skid designs.
-        </p>
-      </section>
+      <div className="page-heading">
+        <h1>Your designs</h1>
+      </div>
       <div className="card designs-card">
         <div className="design-tools">
           <Link className="button primary" to="/designs/new">
