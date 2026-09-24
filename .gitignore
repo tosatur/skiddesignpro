@@ -40,6 +40,9 @@ node_modules/
 *.tmp
 *.temp
 
+# Subagent-driven-development scratch workspace (ledgers, briefs, reports)
+/.superpowers/
+
 # Local environment overrides and logs
 .env
 .env.*
