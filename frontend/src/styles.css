@@ -97,7 +97,7 @@ p + p {
   max-width: 1220px;
   margin: auto;
   height: 100%;
-  padding: 0 20px;
+  padding: 0 40px;
   display: flex;
   align-items: center;
 }
@@ -271,7 +271,7 @@ main:focus {
   font-size: 11px;
   letter-spacing: 1.2px;
   text-transform: uppercase;
-  color: #6e7786;
+  color: var(--color-text-muted);
   margin-bottom: 9px;
 }
 .lede {
@@ -359,7 +359,7 @@ tbody tr:last-child td {
 }
 .loading {
   padding: 50px 0;
-  color: #727b88;
+  color: var(--color-text-muted);
 }
 .text-button {
   border: 0;
@@ -437,7 +437,7 @@ select {
 input:hover,
 textarea:hover,
 select:hover {
-  border-color: var(--color-focus);
+  border-color: var(--color-border-subtle);
 }
 input:focus,
 textarea:focus,
@@ -682,10 +682,6 @@ dd {
   .value-list dd {
     text-align: left;
     margin-top: 4px;
-  }
-  .saved-table th,
-  .saved-table td {
-    padding: 16px;
   }
 }
 @media (max-width: 760px) {
