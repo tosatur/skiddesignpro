@@ -1,6 +1,6 @@
 # SPN pH Correction Skid Designer
 
-Create and save wastewater skid designs, view layouts and export PDF reports. Run it in a browser or as a portable Windows desktop app.
+Create and save wastewater skid designs, view 2D and 3D layouts, record supplier quotes and export PDF reports. Run it in a browser or as a portable Windows desktop app.
 
 ## Build both Windows EXEs
 
@@ -64,6 +64,17 @@ To use a different data folder, set `SPN_DATABASE` before starting either app. F
 $env:SPN_DATABASE = "D:\SPN Data\Designs"
 & ".\release\SPN-Skid-Designer-1.0.0-portable.exe"
 ```
+
+## Prices and quotes
+
+Costs start as budget estimates from `backend/config/designConfig.js` and carry a ±20% range. Replace an estimate with a supplier quote in either place:
+
+- **Price library** (header link): the quote applies to every new or regenerated design.
+- **Cost breakdown** on a design page: the quote applies to that design only. Tick **Also save to price library** to use it for future designs too.
+
+Quoted lines are fixed; the ±20% range applies only to the lines that are still estimates. Saved designs keep the prices they were generated with.
+
+The library is stored as `prices.json` in the data folder described above (`backend/db/data` for the web app, `data` beside the EXE, or `SPN_DATABASE` if set), so copy it whenever you copy that folder. Only prices you have changed are saved; everything else falls back to the config estimate. Deleting `prices.json` resets every price to its estimate.
 
 ## Development
 
