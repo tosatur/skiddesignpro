@@ -4,6 +4,7 @@ import {
   Routes,
   Route,
   Link,
+  NavLink,
   useLocation,
 } from "react-router-dom";
 import HomePage from "./pages/HomePage.jsx";
@@ -12,6 +13,7 @@ import EditDesignPage from "./pages/EditDesignPage.jsx";
 import DesignPage from "./pages/DesignPage.jsx";
 import LayoutPage from "./pages/LayoutPage.jsx";
 import ReportPage from "./pages/ReportPage.jsx";
+import PricesPage from "./pages/PricesPage.jsx";
 
 function Shell() {
   const location = useLocation();
@@ -36,6 +38,9 @@ function Shell() {
               Skid Designer
             </span>
           </Link>
+          <nav className="header-nav" aria-label="Main">
+            <NavLink to="/prices">Price library</NavLink>
+          </nav>
         </div>
       </header>
       <main id="main" tabIndex={-1}>
@@ -46,6 +51,7 @@ function Shell() {
           <Route path="/designs/:id/edit" element={<EditDesignPage />} />
           <Route path="/designs/:id/layout" element={<LayoutPage />} />
           <Route path="/designs/:id/report" element={<ReportPage />} />
+          <Route path="/prices" element={<PricesPage />} />
           <Route
             path="*"
             element={
