@@ -509,6 +509,65 @@ dd {
 .equipment-panel h2 {
   padding: 25px 28px 22px;
 }
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.quote-panel {
+  margin-top: 24px;
+  overflow: hidden;
+}
+.quote-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 25px 28px 22px;
+}
+.quote-heading h2 {
+  margin: 0;
+}
+.quote-panel .notice {
+  margin: 0 28px 16px;
+}
+.quote-ref {
+  display: block;
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+}
+.quote-cell {
+  width: 1%;
+}
+.quote-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.quote-form {
+  display: grid;
+  gap: 10px;
+  min-width: 240px;
+}
+.quote-form label {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+.quote-form .quote-library {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.quote-library input {
+  width: auto;
+  min-height: 0;
+}
 .equipment-panel .tags {
   font-variant-numeric: tabular-nums;
   font-size: 0.85em;

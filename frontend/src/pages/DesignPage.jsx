@@ -6,10 +6,11 @@ import EquipmentPanel from "../components/EquipmentPanel.jsx";
 import DosingPanel from "../components/DosingPanel.jsx";
 import TradeWastePanel from "../components/TradeWastePanel.jsx";
 import CostPanel from "../components/CostPanel.jsx";
+import QuotePanel from "../components/QuotePanel.jsx";
 
 export default function DesignPage() {
   const { id } = useParams();
-  const { design, error } = useDesign(id);
+  const { design, error, reload } = useDesign(id);
   if (!design)
     return (
       <>
@@ -56,6 +57,7 @@ export default function DesignPage() {
           />
         </div>
       </div>
+      <QuotePanel design={design} onChanged={reload} />
     </>
   );
 }

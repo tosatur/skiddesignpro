@@ -40,6 +40,15 @@ const view = (design) =>
 
 export const designService = {
   config: () => request("/config"),
+  prices: () => request("/prices"),
+  setPrice: (key, price) =>
+    request(`/prices/${encodeURIComponent(key)}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(price),
+    }),
+  resetPrice: (key) =>
+    request(`/prices/${encodeURIComponent(key)}`, { method: "DELETE" }),
   list: () => request("/designs"),
   get: async (id, viewMode) => {
     if (!isDesktop())
