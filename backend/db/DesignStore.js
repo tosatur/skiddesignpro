@@ -16,6 +16,7 @@ import { atomicWriteFile } from "../util/atomicWrite.js";
 // The .spnd extension is plain JSON underneath; it just keeps saved designs
 // distinct from unrelated .json files that may end up in the same folder.
 const EXTENSION = ".spnd";
+const SAFE_ID = /^[A-Za-z0-9-]{1,100}$/;
 
 export class DesignStore {
   constructor(dir) {
@@ -38,6 +39,7 @@ export class DesignStore {
   // Synchronous so a read-modify-write (see update()) cannot interleave with
   // another request in this process, matching the SQL transaction it replaces.
   #write(design) {
+    if (!SAFE_ID.test(design.id)) throw new Error("Invalid design id.");
     if (this.memory) return void this.memory.set(design.id, design);
     atomicWriteFile(this.#path(design.id), JSON.stringify(design));
   }
@@ -47,6 +49,7 @@ export class DesignStore {
   }
 
   get(id) {
+    if (!SAFE_ID.test(id)) return null;
     if (this.memory) return this.memory.get(id) ?? null;
     const path = this.#path(id);
     return existsSync(path) ? JSON.parse(readFileSync(path, "utf8")) : null;
@@ -71,6 +74,7 @@ export class DesignStore {
   }
 
   delete(id) {
+    if (!SAFE_ID.test(id)) return false;
     if (this.memory) return this.memory.delete(id);
     const path = this.#path(id);
     if (!existsSync(path)) return false;
