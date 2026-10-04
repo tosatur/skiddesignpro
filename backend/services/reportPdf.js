@@ -32,7 +32,8 @@ export function generateReportPDF(design) {
           new URL("../fonts/LiberationSans-Bold.ttf", import.meta.url),
         ),
       );
-      const report = buildReport(design),
+      const printable = printableText(doc);
+      const report = mapStrings(buildReport(design), printable),
         left = 45,
         usable = doc.page.width - 90,
         bottom = doc.page.height - 58;
@@ -149,7 +150,7 @@ export function generateReportPDF(design) {
         const heading = `${String(index + 1).padStart(2, "0")}   ${section.title}`;
         doc.font("Bold").fontSize(14);
         const headingHeight = doc.heightOfString(heading, { width: usable });
-        const drawing = design.generated.layout.drawing;
+        const drawing = mapStrings(design.generated.layout.drawing, printable);
         let contentHeight = (section.paragraphs ?? []).reduce(
           (height, text) => height + paragraphHeight(text) + 8,
           0,
@@ -234,6 +235,35 @@ export function generateReportPDF(design) {
       reject(error);
     }
   });
+}
+
+function printableText(doc) {
+  doc.font("Body");
+  const font = doc._font?.font;
+  if (!font?.hasGlyphForCodePoint) return (text) => text;
+  const covered = (text) =>
+    [...text].every((char) => font.hasGlyphForCodePoint(char.codePointAt(0)));
+  return (text) =>
+    [...text]
+      .map((char) => {
+        if (covered(char)) return char;
+        const plain = [
+          char.normalize("NFKC"),
+          char.normalize("NFKD").replace(/\p{M}/gu, ""),
+        ].find((candidate) => candidate && covered(candidate));
+        return plain ?? char;
+      })
+      .join("");
+}
+
+function mapStrings(value, map) {
+  if (typeof value === "string") return map(value);
+  if (Array.isArray(value)) return value.map((item) => mapStrings(item, map));
+  if (value && typeof value === "object")
+    return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [key, mapStrings(item, map)]),
+    );
+  return value;
 }
 
 function drawLayout(doc, drawing, x, y, scale) {
