@@ -19,7 +19,11 @@ export function selectChemical(inputs) {
     chemical: designConfig.chemicals.find((c) => c.id === id) ?? null,
     trains,
     capacityLH: null,
-    control: direction === 0 ? "pH monitoring" : "pH feedback",
+    control: trains.length
+      ? "Continuous pH feedback (PID)"
+      : direction === 0
+        ? "pH monitoring"
+        : "pH feedback",
   };
 }
 

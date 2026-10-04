@@ -176,18 +176,33 @@ export function buildReport(design, display = designDisplay(design)) {
                   ]
                 : []),
               ["Control method", display.dosing.control],
-              ...(g.dosing.chemical
+              ...(g.dosing.trains?.length
                 ? [
                     [
+                      "Control strategy",
+                      "pH probes feed the dosing controller, which trims the caustic or acid dose rate in proportion to the deviation from the target pH, tapering as the target is approached.",
+                    ],
+                    [
                       "Chemical demand",
-                      "To be confirmed by wastewater titration / commissioning testing.",
+                      "Not calculated: wastewater composition and buffering vary, so the dose is set in real time by the controller. Confirm reagent consumption by titration and commissioning.",
                     ],
                     [
                       "Dosing pump capacity",
-                      "To be confirmed following chemical demand testing.",
+                      "To be confirmed against tank volume, titration and commissioning results.",
                     ],
                   ]
-                : []),
+                : g.dosing.chemical
+                  ? [
+                      [
+                        "Chemical demand",
+                        "To be confirmed by wastewater titration / commissioning testing.",
+                      ],
+                      [
+                        "Dosing pump capacity",
+                        "To be confirmed following chemical demand testing.",
+                      ],
+                    ]
+                  : []),
               ...(targetPH?.status === "Outside Limit"
                 ? [
                     [
