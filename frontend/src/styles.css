@@ -635,6 +635,35 @@ dd {
   height: auto;
   margin: 20px auto;
 }
+.view-toggle {
+  display: inline-flex;
+  gap: 8px;
+}
+.layout-3d {
+  position: relative;
+  margin: 20px 0 16px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+}
+.layout-3d:active {
+  cursor: grabbing;
+}
+.layout-3d canvas {
+  display: block;
+}
+.layout-3d-tooltip {
+  position: absolute;
+  pointer-events: none;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--color-text);
+  color: var(--color-surface);
+  font-size: 12px;
+  white-space: nowrap;
+}
 .report-paper {
   max-width: 980px;
   margin: auto;

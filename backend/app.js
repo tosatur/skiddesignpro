@@ -46,6 +46,8 @@ export function createApp(
       space,
       defaults,
       inputLimits,
+      heights: designConfig.layout.heights,
+      containerHeight: designConfig.layout.containerHeight,
       testToolsEnabled,
     });
   });
