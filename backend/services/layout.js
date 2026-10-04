@@ -151,13 +151,18 @@ function layoutCandidates(items, config) {
     config,
   );
 
+  const inlet = select("feedPump", ...DOSING_PUMPS);
+  const outlet = select("dischargePump", "coolingHx", "skidController");
+  const stacked = (list) =>
+    list.reduce((total, item) => total + item.width + gap, 0);
+  const controller = select("dosingController");
   const left = group(
-    select("feedPump", ...DOSING_PUMPS, "dosingController"),
+    stacked(inlet) <= stacked(outlet) ? [...inlet, ...controller] : inlet,
     true,
     gap,
   );
   const right = group(
-    select("dischargePump", "coolingHx", "skidController"),
+    stacked(inlet) <= stacked(outlet) ? outlet : [...outlet, ...controller],
     true,
     gap,
   );
