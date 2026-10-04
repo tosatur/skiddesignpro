@@ -424,7 +424,8 @@ fieldset {
 .space-fields {
   margin-top: 22px;
 }
-.field label {
+.field label,
+.field .field-label {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
@@ -481,6 +482,13 @@ textarea::placeholder {
 .form-grid + .field,
 .chemical-field {
   margin-top: 23px;
+}
+.static-value {
+  display: flex;
+  align-items: center;
+  min-height: 33px;
+  margin: 0;
+  font-size: 14px;
 }
 .advanced-section {
   margin-top: 26px;

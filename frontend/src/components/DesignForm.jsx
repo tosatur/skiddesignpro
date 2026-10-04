@@ -139,7 +139,7 @@ export default function DesignForm({
             {field("flowRate", "Design Flow Rate", "kL/h")}
             {field("dailyVolume", "Daily Wastewater Volume", "kL/day")}
             {field("inletPH", "Inlet pH")}
-            {field("targetPH", "Target pH")}
+            {field("targetPH", "Target pH", "6–10")}
             {field("temperature", "Wastewater Temperature", "°C")}
           </div>
           <WastewaterFields
@@ -151,14 +151,19 @@ export default function DesignForm({
             onChange={(value) => set("customWastewaterData", value)}
             calculatedSulphur={calculatedSulphur}
           />
+        </section>
+        <section className="card form-card">
+          <h2>Chemical dosing</h2>
+          <p className="muted small">
+            Both trains are fitted so the controller can correct pH in either
+            direction.
+          </p>
           <div className="form-grid">
             <div className="field chemical-field">
-              <label htmlFor="caustic">Caustic train</label>
-              <input
-                id="caustic"
-                value={config.chemicals.find((c) => c.type === "caustic").name}
-                readOnly
-              />
+              <span className="field-label">Caustic train</span>
+              <div className="static-value">
+                {config.chemicals.find((c) => c.type === "caustic").name}
+              </div>
               <p className="muted small">
                 Raises pH{direction === 1 ? " · main correction" : ""}
               </p>
