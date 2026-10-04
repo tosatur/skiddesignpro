@@ -427,7 +427,7 @@ export function buildReport(design, display = designDisplay(design)) {
             ? table(
                 [
                   "Component",
-                  "Quantity",
+                  "Qty",
                   `Unit cost (${g.cost.currency})`,
                   `Amount (${g.cost.currency})`,
                   "Basis",
