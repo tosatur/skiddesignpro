@@ -222,12 +222,47 @@ export function equipmentDetails(item, equipment, dosing) {
 }
 
 export function generateIOList(equipment) {
-  return equipment.items
-    .filter((item) => item.signal)
-    .map(({ name, quantity, signal }) => ({
-      name: signal === "Output" ? `${name} command` : name,
-      quantity,
-      direction: signal,
-    }))
-    .sort((a, b) => a.direction.localeCompare(b.direction));
+  const controllerTag = (id) =>
+    equipment.items.find((item) => item.id === id)?.tags?.[0] ?? null;
+  const controllers = {
+    dosing: controllerTag("dosingController") ?? "Dosing controller",
+    skid: controllerTag("skidController") ?? "Skid controller",
+  };
+  return equipment.items.flatMap((item) => {
+    const signals = designConfig.ioSignals[item.id];
+    if (!signals) return [];
+    const tags = item.tags?.length ? item.tags : [null];
+    return tags.flatMap((tag) =>
+      signals.map(({ type, signal, controller }) => ({
+        tag,
+        name: item.name,
+        signal,
+        type,
+        direction: type.endsWith("I") ? "Input" : "Output",
+        controller: controllers[controller],
+        quantity: tag ? 1 : item.quantity,
+      })),
+    );
+  });
+}
+
+export function summariseIO(ioList, items = []) {
+  const types = ["AI", "AO", "DI", "DO"];
+  const counted = ioList.filter((io) => io.tag);
+  const controllers = [...new Set(counted.map((io) => io.controller))];
+  return controllers.map((controller) => {
+    const name = items.find((item) => item.tags?.includes(controller))?.name;
+    const counts = Object.fromEntries(
+      types.map((type) => [
+        type,
+        counted.filter((io) => io.controller === controller && io.type === type)
+          .length,
+      ]),
+    );
+    return {
+      controller: name ? `${controller} ${name}` : controller,
+      ...counts,
+      total: types.reduce((sum, type) => sum + counts[type], 0),
+    };
+  });
 }

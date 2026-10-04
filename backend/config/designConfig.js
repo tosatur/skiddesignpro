@@ -114,6 +114,36 @@ export const designConfig = {
     recirculationLines: 1,
   },
   tagging: { plant: "100" },
+  ioSignals: {
+    phProbe: [{ type: "AI", signal: "pH, 4–20 mA", controller: "dosing" }],
+    levelProbe: [{ type: "AI", signal: "Level, 4–20 mA", controller: "skid" }],
+    lowLevelSwitch: [{ type: "DI", signal: "Low level", controller: "skid" }],
+    highLevelSwitch: [{ type: "DI", signal: "High level", controller: "skid" }],
+    feedPump: [
+      { type: "DO", signal: "Run command", controller: "skid" },
+      { type: "DI", signal: "Running feedback", controller: "skid" },
+    ],
+    dischargePump: [
+      { type: "DO", signal: "Run command", controller: "skid" },
+      { type: "DI", signal: "Running feedback", controller: "skid" },
+    ],
+    agitator: [
+      { type: "DO", signal: "Run command", controller: "skid" },
+      { type: "DI", signal: "Running feedback", controller: "skid" },
+    ],
+    causticDosingPump: [
+      { type: "AO", signal: "Dose rate (speed / pulse)", controller: "dosing" },
+      { type: "DI", signal: "Fault", controller: "dosing" },
+    ],
+    acidDosingPump: [
+      { type: "AO", signal: "Dose rate (speed / pulse)", controller: "dosing" },
+      { type: "DI", signal: "Fault", controller: "dosing" },
+    ],
+    actuatedValve: [
+      { type: "DO", signal: "Open command", controller: "skid" },
+      { type: "DI", signal: "Open position", controller: "skid" },
+    ],
+  },
   chemicals: [
     { id: "naoh", name: "Sodium Hydroxide (NaOH)", type: "caustic" },
     { id: "hcl", name: "Hydrochloric Acid (HCl)", type: "acid" },

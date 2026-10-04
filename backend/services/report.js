@@ -1,4 +1,5 @@
 import { designDisplay } from "./designDisplay.js";
+import { summariseIO } from "./equipmentSelection.js";
 
 const unavailable = "Not selected";
 const number = (value) =>
@@ -42,6 +43,7 @@ export function buildReport(design, display = designDisplay(design)) {
     (p) => p.value && !["tn", "totalNitrogen"].includes(p.key),
   );
   const tagged = display.equipment.items.some((e) => e.tags?.length);
+  const typedIO = g.ioList.some((io) => io.type);
   const costValue = (value) =>
     value == null ? "To be confirmed" : money(value, g.cost.currency);
   const subtotal = g.cost.complete
@@ -223,20 +225,55 @@ export function buildReport(design, display = designDisplay(design)) {
       },
       {
         title: "Electrical I/O",
-        tables: [
-          table(
-            ["Direction", "Equipment", "Quantity"],
-            g.ioList.map((io) => [
-              io.direction,
-              io.name,
-              io.quantity ?? unavailable,
-            ]),
-            [0.2, 0.6, 0.2],
-          ),
-        ],
-        notes: [
-          "Preliminary I/O: instruments and agitators are per tank; feed, discharge and dosing pumps are shared.",
-        ],
+        tables: typedIO
+          ? [
+              table(
+                ["Tag", "Equipment", "Signal", "Type", "Controller"],
+                g.ioList.map((io) => [
+                  io.tag ?? unavailable,
+                  io.name,
+                  io.signal,
+                  io.type,
+                  io.controller,
+                ]),
+                [0.18, 0.26, 0.28, 0.1, 0.18],
+              ),
+              table(
+                ["Controller", "AI", "AO", "DI", "DO", "Total"],
+                summariseIO(g.ioList, display.equipment.items).map((row) => [
+                  row.controller,
+                  row.AI,
+                  row.AO,
+                  row.DI,
+                  row.DO,
+                  row.total,
+                ]),
+                [0.4, 0.12, 0.12, 0.12, 0.12, 0.12],
+              ),
+            ]
+          : [
+              table(
+                ["Direction", "Equipment", "Quantity"],
+                g.ioList.map((io) => [
+                  io.direction,
+                  io.name,
+                  io.quantity ?? unavailable,
+                ]),
+                [0.2, 0.6, 0.2],
+              ),
+            ],
+        notes: typedIO
+          ? [
+              "Preliminary hardwired I/O; spare capacity not included. A fieldbus (e.g. Modbus or AS-i) may replace discrete wiring at detailed design.",
+              ...(g.ioList.some((io) => !io.tag)
+                ? [
+                    "Signal counts exclude equipment not yet selected; complete the equipment selection for a full I/O count.",
+                  ]
+                : []),
+            ]
+          : [
+              "Preliminary I/O: instruments and agitators are per tank; feed, discharge and dosing pumps are shared.",
+            ],
       },
       {
         title: "2D Layout",
