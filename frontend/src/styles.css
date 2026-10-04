@@ -785,7 +785,7 @@ dd {
     flex-direction: column;
   }
   .details-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
   }
   .value-list > div {
     display: block;
