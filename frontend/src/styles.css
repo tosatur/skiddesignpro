@@ -434,7 +434,7 @@ fieldset {
   margin-bottom: 8px;
 }
 .field-unit {
-  color: #8a919d;
+  color: var(--color-text-muted);
   font-weight: 400;
   white-space: nowrap;
 }
@@ -506,7 +506,7 @@ summary {
 }
 dt {
   font-size: 12px;
-  color: #75808e;
+  color: var(--color-text-muted);
 }
 dd {
   margin: 5px 0 0;
