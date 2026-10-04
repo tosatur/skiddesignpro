@@ -9,21 +9,26 @@ import { designDisplay } from "../services/designDisplay.js";
 // authoritative copy of a design and decides where it lives on disk, so
 // these compute from a posted design instead of a stored one and never
 // write anything themselves.
-export function designToolsRoutes() {
+export function designToolsRoutes(prices) {
   const router = Router();
+  const priceBook = () => prices?.book();
 
   router.post("/compute", (req, res) => {
-    res.json(new Design(req.body?.inputs, req.body?.previous ?? null));
+    res.json(
+      new Design(req.body?.inputs, req.body?.previous ?? null, {
+        priceBook: priceBook(),
+      }),
+    );
   });
 
   router.post("/view", (req, res) => {
-    const design = withOutputs(req.body);
+    const design = withOutputs(req.body, priceBook());
     const display = designDisplay(design);
     res.json({ ...design, display, report: buildReport(design, display) });
   });
 
   router.post("/report.pdf", async (req, res) => {
-    const design = withOutputs(req.body);
+    const design = withOutputs(req.body, priceBook());
     const name =
       design.designName.replace(/[^a-z0-9_-]/gi, "-").slice(0, 70) ||
       "SPN-design";

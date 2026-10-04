@@ -6,8 +6,9 @@ import { generateReportPDF } from "../services/reportPdf.js";
 import { designDisplay } from "../services/designDisplay.js";
 import { exactSulphurTotal } from "../../shared/measurements.js";
 
-export function designRoutes(store, { testToolsEnabled = false } = {}) {
+export function designRoutes(store, { testToolsEnabled = false, prices } = {}) {
   const router = Router();
+  const priceBook = () => prices?.book();
   router.get("/", (_req, res) =>
     res.json(
       store.list().map(({ id, designName, clientName, inputs, updatedAt }) => ({
@@ -20,7 +21,13 @@ export function designRoutes(store, { testToolsEnabled = false } = {}) {
     ),
   );
   router.post("/", (req, res) =>
-    res.status(201).json(store.create(new Design(req.body?.inputs))),
+    res
+      .status(201)
+      .json(
+        store.create(
+          new Design(req.body?.inputs, null, { priceBook: priceBook() }),
+        ),
+      ),
   );
   if (testToolsEnabled) {
     router.delete("/", (_req, res) => {
@@ -78,7 +85,9 @@ export function designRoutes(store, { testToolsEnabled = false } = {}) {
       const designs = store.list();
       const text = designs.length
         ? designs
-            .map((design) => buildReportText(buildReport(withOutputs(design))))
+            .map((design) =>
+              buildReportText(buildReport(withOutputs(design, priceBook()))),
+            )
             .join("\n\n")
         : "No saved designs.\n";
       res
@@ -98,7 +107,7 @@ export function designRoutes(store, { testToolsEnabled = false } = {}) {
   router.get("/:id", (req, res) => {
     // Settings must remain accessible for correcting older invalid inputs.
     if (req.query.view === "settings") return res.json(req.design);
-    const design = withOutputs(req.design);
+    const design = withOutputs(req.design, priceBook());
     const display = designDisplay(design);
     res.json({
       ...design,
@@ -115,6 +124,7 @@ export function designRoutes(store, { testToolsEnabled = false } = {}) {
       store.update(
         new Design(req.body.inputs, req.design, {
           inputsOnly: !req.design.generated,
+          priceBook: priceBook(),
         }),
         req.design.revision,
       ),
@@ -136,7 +146,7 @@ export function designRoutes(store, { testToolsEnabled = false } = {}) {
     const name =
       req.design.designName.replace(/[^a-z0-9_-]/gi, "-").slice(0, 70) ||
       "SPN-design";
-    const pdf = await generateReportPDF(withOutputs(req.design));
+    const pdf = await generateReportPDF(withOutputs(req.design, priceBook()));
     res
       .set({
         "Content-Type": "application/pdf",

@@ -12,7 +12,7 @@ import { generateLayout } from "../services/layout.js";
 import { estimateCost } from "../services/costing.js";
 import { processCalculations } from "../services/processCalcs.js";
 
-export function generateOutputs(inputs) {
+export function generateOutputs(inputs, priceBook) {
   const profile = new WastewaterProfile(inputs);
   const dosing = selectChemical(inputs);
   const equipment = selectEquipment(inputs, dosing);
@@ -23,14 +23,18 @@ export function generateOutputs(inputs) {
     compliance: checkTradeWaste(inputs, profile),
     layout: generateLayout(inputs, equipment),
     ioList: generateIOList(equipment),
-    cost: estimateCost(equipment),
+    cost: estimateCost(equipment, priceBook, inputs.priceOverrides),
     process: processCalculations(inputs, equipment),
     note: designConfig.reportNote,
   };
 }
 
 export class Design {
-  constructor(rawInputs, previous = null, { inputsOnly = false } = {}) {
+  constructor(
+    rawInputs,
+    previous = null,
+    { inputsOnly = false, priceBook } = {},
+  ) {
     const inputs = validateInputs(rawInputs);
     const now = new Date().toISOString();
     this.schemaVersion = designConfig.version;
@@ -41,19 +45,19 @@ export class Design {
     this.updatedAt = now;
     this.revision = (previous?.revision ?? 0) + 1;
     this.inputs = inputs;
-    if (!inputsOnly) this.generated = generateOutputs(inputs);
+    if (!inputsOnly) this.generated = generateOutputs(inputs, priceBook);
   }
 }
 
 // Input-only designs (older saves, or imports) share normal calculations.
 // Reads never write generated outputs back or change the revision of the
 // design they were computed from.
-export function withOutputs(design) {
+export function withOutputs(design, priceBook) {
   if (design.generated) return design;
   try {
     return {
       ...design,
-      generated: generateOutputs(validateInputs(design.inputs)),
+      generated: generateOutputs(validateInputs(design.inputs), priceBook),
     };
   } catch (error) {
     if (error.fields)

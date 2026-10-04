@@ -89,6 +89,20 @@ const inputSchema = z.object({
       designConfig.chemicals.filter((c) => c.type === "acid").map((c) => c.id),
     )
     .default(designConfig.defaults.acidId),
+  priceOverrides: z
+    .record(
+      z.string().max(40),
+      z.object({
+        unitCost: z
+          .number({ error: "Quoted unit cost must be numeric." })
+          .finite()
+          .positive("Quoted unit cost must be greater than 0.")
+          .max(1e8, "Quoted unit cost is too large."),
+        quoteRef: z.string().trim().max(120).default(""),
+      }),
+    )
+    .refine((value) => Object.keys(value).length <= 50, "Too many quotes.")
+    .default({}),
 });
 
 export function validateInputs(raw) {

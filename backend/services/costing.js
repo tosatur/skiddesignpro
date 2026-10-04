@@ -1,4 +1,5 @@
 import { designConfig } from "../config/designConfig.js";
+import { PriceLibrary } from "../db/PriceLibrary.js";
 
 const DOSING_PUMPS = ["dosingPump", "causticDosingPump", "acidDosingPump"];
 const PACKAGED = [
@@ -13,84 +14,102 @@ const PACKAGED = [
   "recirculation",
 ];
 
-export function estimateCost(equipment) {
+const priceKey = (id, equipment) =>
+  id === "tank"
+    ? `tank:${equipment.tank.sizeKL}`
+    : ["feedPump", "dischargePump"].includes(id)
+      ? `pump:${equipment.pump.flowKLH}`
+      : DOSING_PUMPS.includes(id)
+        ? "dosingPump"
+        : id === "controlPanel"
+          ? "skidController"
+          : id;
+
+export const configPriceBook = () => new PriceLibrary(":memory:").book();
+
+export function estimateCost(
+  equipment,
+  priceBook = configPriceBook(),
+  overrides = {},
+) {
   const costs = designConfig.costs;
+  const line = (id, name, quantity) => {
+    const key = priceKey(id, equipment);
+    const override = overrides[id];
+    const price = priceBook[key];
+    const unitCost = override?.unitCost ?? price?.unitCost ?? null;
+    const basis = override
+      ? "quoted"
+      : price?.status === "quoted"
+        ? "library"
+        : "estimate";
+    return {
+      id,
+      name,
+      priceKey: key,
+      quantity,
+      unitCost,
+      amount: quantity != null && unitCost != null ? quantity * unitCost : null,
+      basis,
+      quoteRef:
+        override?.quoteRef ?? (basis === "library" ? price.quoteRef : ""),
+    };
+  };
   const lines = equipment.items
     .filter((item) => !PACKAGED.includes(item.id))
-    .map((item) => {
-      const unitCost =
-        item.id === "tank"
-          ? costs.tanks[equipment.tank.sizeKL]
-          : ["feedPump", "dischargePump"].includes(item.id)
-            ? costs.pumps[equipment.pump.flowKLH]
-            : DOSING_PUMPS.includes(item.id)
-              ? costs.dosingPump
-              : costs[item.id];
-      return {
-        id: item.id,
-        name:
-          item.id === "phProbe"
-            ? "pH instrumentation"
-            : item.id === "dosingPump"
-              ? "Chemical dosing system"
-              : item.id === "causticDosingPump"
-                ? "Caustic dosing system"
-                : item.id === "acidDosingPump"
-                  ? "Acid dosing system"
-                  : item.name,
-        quantity: item.quantity,
-        unitCost: unitCost ?? null,
-        amount:
-          item.quantity != null && unitCost != null
-            ? item.quantity * unitCost
-            : null,
-      };
-    });
+    .map((item) =>
+      line(
+        item.id,
+        item.id === "phProbe"
+          ? "pH instrumentation"
+          : item.id === "dosingPump"
+            ? "Chemical dosing system"
+            : item.id === "causticDosingPump"
+              ? "Caustic dosing system"
+              : item.id === "acidDosingPump"
+                ? "Acid dosing system"
+                : item.name,
+        item.quantity,
+      ),
+    );
   // Package allowances keep related items together without double-counting.
   // Unit rates are editable budget inputs, ready to replace with vendor prices.
   const levelItems = equipment.items.some((item) =>
     ["levelProbe", "lowLevelSwitch", "highLevelSwitch"].includes(item.id),
   );
-  for (const [id, name, quantity, unitCost] of [
-    ...(levelItems
-      ? [
-          [
-            "levelInstrumentation",
-            "Level instrumentation (LT, low/high switches)",
-            equipment.tank.count,
-            costs.levelInstrumentation,
-          ],
-        ]
-      : []),
-    ["fabrication", "Skid frame / fabrication", 1, costs.fabrication],
-    [
-      "pipingValvesAssembly",
-      "Piping, valves and assembly",
-      1,
-      costs.pipingValvesAssembly,
-    ],
-  ])
-    lines.push({
-      id,
-      name,
-      quantity,
-      unitCost: unitCost ?? null,
-      amount: quantity != null && unitCost != null ? quantity * unitCost : null,
-    });
-  const complete = lines.every((line) => line.amount !== null);
-  const subtotal = lines.reduce((total, line) => total + (line.amount ?? 0), 0);
+  if (levelItems)
+    lines.push(
+      line(
+        "levelInstrumentation",
+        "Level instrumentation (LT, low/high switches)",
+        equipment.tank.count,
+      ),
+    );
+  lines.push(
+    line("fabrication", "Skid frame / fabrication", 1),
+    line("pipingValvesAssembly", "Piping, valves and assembly", 1),
+  );
+  const complete = lines.every((l) => l.amount !== null);
+  const sum = (filter) =>
+    lines.filter(filter).reduce((total, l) => total + (l.amount ?? 0), 0);
+  const subtotal = sum(() => true);
+  const quoted = sum((l) => l.basis !== "estimate");
+  const estimated = subtotal - quoted;
+  const u = costs.uncertainty;
   return {
     currency: costs.currency,
-    uncertainty: costs.uncertainty,
+    uncertainty: u,
     lines,
     complete,
     subtotal: complete ? subtotal : null,
+    quoted: complete ? quoted : null,
+    quotedShare: complete && subtotal ? quoted / subtotal : null,
     low: complete
-      ? Math.floor((subtotal * (1 - costs.uncertainty)) / costs.rounding) *
+      ? Math.floor((quoted + estimated * (1 - u)) / costs.rounding) *
         costs.rounding
       : null,
     high: complete
-      ? Math.ceil((subtotal * (1 + costs.uncertainty)) / costs.rounding) *
+      ? Math.ceil((quoted + estimated * (1 + u)) / costs.rounding) *
         costs.rounding
       : null,
   };

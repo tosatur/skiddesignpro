@@ -49,8 +49,8 @@ export function createApp(
       testToolsEnabled,
     });
   });
-  app.use("/api/designs", designRoutes(store, { testToolsEnabled }));
-  app.use("/api/design-tools", designToolsRoutes());
+  app.use("/api/designs", designRoutes(store, { testToolsEnabled, prices }));
+  app.use("/api/design-tools", designToolsRoutes(prices));
   app.use("/api/prices", priceRoutes(prices));
   app.use("/api", (_req, res) =>
     res.status(404).json({ error: "API endpoint not found." }),

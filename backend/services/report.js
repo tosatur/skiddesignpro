@@ -44,6 +44,16 @@ export function buildReport(design, display = designDisplay(design)) {
   );
   const tagged = display.equipment.items.some((e) => e.tags?.length);
   const typedIO = g.ioList.some((io) => io.type);
+  const costBasis = g.cost.lines.some((line) => line.basis);
+  const basisLabel = (line) => {
+    const label =
+      line.basis === "quoted"
+        ? "Quote"
+        : line.basis === "library"
+          ? "Library quote"
+          : "Estimate";
+    return line.quoteRef ? `${label} (${line.quoteRef})` : label;
+  };
   const costValue = (value) =>
     value == null ? "To be confirmed" : money(value, g.cost.currency);
   const subtotal = g.cost.complete
@@ -408,35 +418,68 @@ export function buildReport(design, display = designDisplay(design)) {
       {
         title: "Approximate Cost",
         paragraphs: [
-          "Preliminary component budget estimates only; not vendor quotations.",
+          costBasis
+            ? "Preliminary budget. Quoted prices are used as given; the remaining lines are budget estimates, not vendor quotations."
+            : "Preliminary component budget estimates only; not vendor quotations.",
         ],
         tables: [
-          table(
-            [
-              "Component",
-              "Quantity",
-              `Unit budget (${g.cost.currency})`,
-              `Estimate (${g.cost.currency})`,
-            ],
-            g.cost.lines.map((line) => [
-              line.name,
-              line.quantity ?? "-",
-              line.unitCost == null ? "-" : costValue(line.unitCost),
-              costValue(line.amount),
-            ]),
-            [0.46, 0.1, 0.22, 0.22],
-          ),
+          costBasis
+            ? table(
+                [
+                  "Component",
+                  "Quantity",
+                  `Unit cost (${g.cost.currency})`,
+                  `Amount (${g.cost.currency})`,
+                  "Basis",
+                ],
+                g.cost.lines.map((line) => [
+                  line.name,
+                  line.quantity ?? "-",
+                  line.unitCost == null ? "-" : costValue(line.unitCost),
+                  costValue(line.amount),
+                  basisLabel(line),
+                ]),
+                [0.34, 0.09, 0.17, 0.17, 0.23],
+              )
+            : table(
+                [
+                  "Component",
+                  "Quantity",
+                  `Unit budget (${g.cost.currency})`,
+                  `Estimate (${g.cost.currency})`,
+                ],
+                g.cost.lines.map((line) => [
+                  line.name,
+                  line.quantity ?? "-",
+                  line.unitCost == null ? "-" : costValue(line.unitCost),
+                  costValue(line.amount),
+                ]),
+                [0.46, 0.1, 0.22, 0.22],
+              ),
           table(
             ["Estimate", "Value"],
             [
               ["Estimated equipment subtotal", costValue(subtotal)],
+              ...(costBasis && g.cost.complete
+                ? [
+                    [
+                      "Quoted portion",
+                      `${costValue(g.cost.quoted)} (${Math.round(g.cost.quotedShare * 100)}%)`,
+                    ],
+                  ]
+                : []),
               [
                 "Preliminary estimated cost range",
                 g.cost.complete
                   ? `${money(g.cost.low, g.cost.currency)}–${money(g.cost.high, g.cost.currency)} ${g.cost.currency}`
                   : "Equipment selection incomplete",
               ],
-              ["Budget allowance", `±${Math.round(g.cost.uncertainty * 100)}%`],
+              [
+                "Budget allowance",
+                costBasis
+                  ? `±${Math.round(g.cost.uncertainty * 100)}% on estimated lines; quoted lines fixed`
+                  : `±${Math.round(g.cost.uncertainty * 100)}%`,
+              ],
             ],
           ),
         ],
