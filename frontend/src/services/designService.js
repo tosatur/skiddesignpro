@@ -18,6 +18,7 @@ async function request(path, options) {
   if (!response.ok) {
     const error = new Error(data.error || "Could not complete this request.");
     error.fields = data.fields;
+    error.status = response.status;
     throw error;
   }
   return data;

@@ -97,7 +97,12 @@ export default function QuotePanel({ design, onChanged }) {
         design.revision,
       );
     } catch (error) {
-      setMessage(error.message);
+      if (error.status === 409) {
+        setMessage(
+          "This design was changed elsewhere and has been reloaded. Check the figures, then save your quote again.",
+        );
+        onChanged();
+      } else setMessage(error.message);
       setBusy(false);
       return;
     }
