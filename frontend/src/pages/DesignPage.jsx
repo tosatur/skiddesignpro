@@ -43,10 +43,6 @@ export default function DesignPage() {
       <div className="details-grid">
         <div className="panel-stack">
           <EquipmentPanel equipment={design.display.equipment} />
-          <TradeWastePanel
-            results={design.generated.compliance}
-            reportTo={`/designs/${id}/report`}
-          />
         </div>
         <div className="panel-stack">
           <DosingPanel dosing={design.display.dosing} />
@@ -54,6 +50,10 @@ export default function DesignPage() {
             cost={design.generated.cost}
             layout={design.generated.layout}
             spaceCheck={design.display.spaceCheck}
+          />
+          <TradeWastePanel
+            results={design.generated.compliance}
+            reportTo={`/designs/${id}/report`}
           />
         </div>
       </div>

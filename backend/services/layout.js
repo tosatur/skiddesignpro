@@ -152,37 +152,50 @@ function layoutCandidates(items, config) {
     config,
   );
 
-  const inlet = select("feedPump", ...DOSING_PUMPS);
-  const outlet = select("dischargePump", "coolingHx", "skidController");
   const stacked = (list) =>
     list.reduce((total, item) => total + item.width + gap, 0);
-  const controller = select("dosingController");
-  const left = group(
-    stacked(inlet) <= stacked(outlet) ? [...inlet, ...controller] : inlet,
-    true,
-    gap,
-  );
-  const right = group(
-    stacked(inlet) <= stacked(outlet) ? outlet : [...outlet, ...controller],
-    true,
-    gap,
-  );
-  const innerWidth = Math.max(tanks.width, left.width, right.width);
-  const tankX = left.items.length ? left.length + rowGap : 0;
-  const ends = frame(
+  const atEnds = (arrangement, row, outlet) => {
+    const inlet = select("feedPump", ...DOSING_PUMPS);
+    const controller = select("dosingController");
+    const left = group(
+      stacked(inlet) <= stacked(outlet) ? [...inlet, ...controller] : inlet,
+      true,
+      gap,
+    );
+    const right = group(
+      stacked(inlet) <= stacked(outlet) ? outlet : [...outlet, ...controller],
+      true,
+      gap,
+    );
+    const innerWidth = Math.max(row.width, left.width, right.width);
+    const rowX = left.items.length ? left.length + rowGap : 0;
+    return frame(
+      arrangement,
+      [
+        ...place(left, 0, (innerWidth - left.width) / 2),
+        ...place(row, rowX, (innerWidth - row.width) / 2),
+        ...place(
+          right,
+          rowX + row.length + rowGap,
+          (innerWidth - right.width) / 2,
+        ),
+      ],
+      config,
+    );
+  };
+  const ends = atEnds(
     "auxiliaries-at-ends",
-    [
-      ...place(left, 0, (innerWidth - left.width) / 2),
-      ...place(tanks, tankX, (innerWidth - tanks.width) / 2),
-      ...place(
-        right,
-        tankX + tanks.length + rowGap,
-        (innerWidth - right.width) / 2,
-      ),
-    ],
-    config,
+    tanks,
+    select("dischargePump", "coolingHx", "skidController"),
   );
-  return [below, ends];
+  const exchanger = select("coolingHx");
+  if (!exchanger.length) return [below, ends];
+  const inline = atEnds(
+    "exchanger-inline",
+    group([...select("tank"), ...exchanger], false, gap),
+    select("dischargePump", "skidController"),
+  );
+  return [below, ends, inline];
 }
 
 function processConnections(items) {

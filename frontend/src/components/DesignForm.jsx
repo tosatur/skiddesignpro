@@ -207,11 +207,6 @@ export default function DesignForm({
         </div>
       )}
       <div className="form-actions">
-        {deleteAction && (
-          <fieldset className="delete-action" disabled={busy}>
-            {deleteAction}
-          </fieldset>
-        )}
         <Link className="button" to={cancelTo}>
           Cancel
         </Link>
