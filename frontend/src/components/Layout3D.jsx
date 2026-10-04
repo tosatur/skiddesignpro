@@ -148,15 +148,19 @@ export default function Layout3D({ layout, equipment, heights }) {
     renderer.setPixelRatio(window.devicePixelRatio);
     element.appendChild(renderer.domElement);
 
-    const span = Math.max(length, width, tallest);
-    const camera = new THREE.PerspectiveCamera(40, 1, 0.05, span * 20);
-    camera.position.set(
-      length / 2 + span * 0.45,
-      tallest + span * 0.35,
-      width / 2 + span * 0.75,
-    );
+    const top = tallest + (heights.frame ?? 0.15);
+    const centre = new THREE.Vector3(length / 2, top / 2, width / 2);
+    const radius = Math.hypot(length, width, top) / 2;
+    const fov = 40;
+    const distance =
+      (radius / Math.sin(THREE.MathUtils.degToRad(fov / 2))) * 1.05;
+    const camera = new THREE.PerspectiveCamera(fov, 1, 0.05, distance * 10);
+    camera.position
+      .copy(new THREE.Vector3(0.55, 0.5, 0.85).normalize())
+      .multiplyScalar(distance)
+      .add(centre);
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.target.set(length / 2, tallest / 3, width / 2);
+    controls.target.copy(centre);
     controls.maxPolarAngle = Math.PI / 2.05;
     controls.update();
 
