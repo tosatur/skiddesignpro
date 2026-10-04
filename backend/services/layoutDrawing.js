@@ -204,6 +204,8 @@ function drawConnections(layout, boxes, { left, width }, pen) {
   }
 }
 
+const MIN_LABEL_SIZE = 11;
+
 const CONTROLLERS = {
   controlPanel: ["Control Panel", "/ HMI"],
   dosingController: ["Dosing", "controller"],
@@ -245,20 +247,28 @@ function drawEquipment(item, { shapes, text, rect }) {
       CONTROLLERS[item.equipmentId] ? "#edf0f4" : "#fff",
       item.equipmentId,
     );
-    const labels =
+    const shortTag = item.tag?.replace(/^\d+/, "");
+    const named =
       CONTROLLERS[item.equipmentId] ??
       (item.equipmentId === "dosingPump"
         ? item.details.split(" ")
         : ["causticDosingPump", "acidDosingPump"].includes(item.equipmentId)
-          ? [item.details.split(" ")[0], item.details.match(/\((.+)\)/)?.[1]]
+          ? [
+              item.details.match(/\((.+)\)/)?.[1],
+              shortTag ?? item.details.split(" ")[0],
+            ]
           : item.equipmentId === "coolingHx"
             ? ["Cooling HX", item.rating?.split(" to ")[0]]
             : [item.name, item.rating]);
-    const fontSize = Math.min(
-      15,
-      item.length /
-        (Math.max(...labels.map((label) => label?.length ?? 0)) * 0.54 + 1),
-    );
+    const sizeFor = (list) =>
+      Math.min(
+        15,
+        item.length /
+          (Math.max(...list.map((label) => label?.length ?? 0)) * 0.54 + 1),
+      );
+    const labels =
+      sizeFor(named) < MIN_LABEL_SIZE && shortTag ? [shortTag] : named;
+    const fontSize = sizeFor(labels);
     labels.forEach(
       (label, index) =>
         label &&

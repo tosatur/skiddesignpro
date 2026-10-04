@@ -46,6 +46,7 @@ function physicalEquipment(equipment, config) {
         name: item.id === "tank" ? `Tank ${index + 1}` : item.name,
         rating: item.rating,
         details: item.details,
+        tag: item.tags?.[index] ?? null,
         length: footprint.length,
         width: footprint.width,
         ...(item.id === "tank" && {
