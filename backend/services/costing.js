@@ -1,14 +1,22 @@
 import { designConfig } from "../config/designConfig.js";
 
 const DOSING_PUMPS = ["dosingPump", "causticDosingPump", "acidDosingPump"];
+const PACKAGED = [
+  "levelProbe",
+  "lowLevelSwitch",
+  "highLevelSwitch",
+  "manualValve",
+  "nonReturnValve",
+  "pressureReliefValve",
+  "actuatedValve",
+  "overflow",
+  "recirculation",
+];
 
 export function estimateCost(equipment) {
   const costs = designConfig.costs;
   const lines = equipment.items
-    .filter(
-      (item) =>
-        !["levelProbe", "lowLevelSwitch", "highLevelSwitch"].includes(item.id),
-    )
+    .filter((item) => !PACKAGED.includes(item.id))
     .map((item) => {
       const unitCost =
         item.id === "tank"

@@ -107,6 +107,11 @@ export const designConfig = {
     skidControllers: 1,
     causticDosingPumps: 1,
     acidDosingPumps: 1,
+    manualValvesPerTrain: 2,
+    nonReturnValvesPerTrain: 1,
+    pressureReliefValvesPerTrain: 1,
+    actuatedValves: 2,
+    recirculationLines: 1,
   },
   chemicals: [
     { id: "naoh", name: "Sodium Hydroxide (NaOH)", type: "caustic" },

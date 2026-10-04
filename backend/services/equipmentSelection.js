@@ -127,6 +127,44 @@ export function selectEquipment(inputs, dosing) {
     quantities.skidControllers,
     null,
   );
+  const trains = quantities.causticDosingPumps + quantities.acidDosingPumps;
+  add(
+    "manualValve",
+    "Manual isolation valve",
+    trains * quantities.manualValvesPerTrain,
+    null,
+  );
+  add(
+    "nonReturnValve",
+    "Non-return valve",
+    trains * quantities.nonReturnValvesPerTrain,
+    null,
+  );
+  add(
+    "pressureReliefValve",
+    "Pressure relief valve",
+    trains * quantities.pressureReliefValvesPerTrain,
+    null,
+  );
+  add(
+    "actuatedValve",
+    "Actuated valve",
+    quantities.actuatedValves,
+    null,
+    "Output",
+  );
+  add(
+    "overflow",
+    "Tank overflow",
+    tank.count === null ? null : Math.max(0, tank.count - 1),
+    null,
+  );
+  add(
+    "recirculation",
+    "Recirculation line",
+    quantities.recirculationLines,
+    null,
+  );
   const equipment = { tank, pump, items, sizing };
   for (const item of items)
     item.details = equipmentDetails(item, equipment, dosing);
@@ -171,6 +209,13 @@ export function equipmentDetails(item, equipment, dosing) {
   if (item.id === "controlPanel") return "Skid control";
   if (item.id === "dosingController") return "pH control of dosing trains";
   if (item.id === "skidController") return "Level, pump and sequence control";
+  if (item.id === "manualValve") return "Chemical line isolation";
+  if (item.id === "nonReturnValve") return "Chemical line, one per train";
+  if (item.id === "pressureReliefValve")
+    return "Dosing pump discharge, one per train";
+  if (item.id === "actuatedValve") return "Discharge / recirculation divert";
+  if (item.id === "overflow") return "Between balancing tanks";
+  if (item.id === "recirculation") return "Discharge back to buffer tank";
   return "Flow outside selection range";
 }
 
