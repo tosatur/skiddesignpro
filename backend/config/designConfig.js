@@ -113,6 +113,20 @@ export const designConfig = {
     actuatedValves: 2,
     recirculationLines: 1,
   },
+  piping: {
+    maxVelocity: 2.5,
+    sizes: [
+      { dn: 25, idMm: 27.9 },
+      { dn: 32, idMm: 36.6 },
+      { dn: 40, idMm: 42.7 },
+      { dn: 50, idMm: 54.8 },
+      { dn: 65, idMm: 66.9 },
+      { dn: 80, idMm: 82.8 },
+      { dn: 100, idMm: 108.2 },
+      { dn: 125, idMm: 134.5 },
+      { dn: 150, idMm: 161.5 },
+    ],
+  },
   tagging: { plant: "100" },
   ioSignals: {
     phProbe: [{ type: "AI", signal: "pH, 4–20 mA", controller: "dosing" }],
@@ -215,5 +229,5 @@ export const designConfig = {
     dimension: 100,
   },
   reportNote:
-    "Preliminary screening only. Final discharge compliance must be confirmed against site-specific acceptance requirements. Final tank sizing, pump head and pipeline sizing to be confirmed during detailed engineering. Confirm equipment dimensions and access before fabrication. Costs exclude GST, delivery, site works and chemicals.",
+    "Preliminary screening only. Final discharge compliance must be confirmed against site-specific acceptance requirements. Final tank sizing, pump head and final pipe sizes to be confirmed during detailed engineering. Confirm equipment dimensions and access before fabrication. Costs exclude GST, delivery, site works and chemicals.",
 };

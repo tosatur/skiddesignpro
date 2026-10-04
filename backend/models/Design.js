@@ -10,6 +10,7 @@ import {
 import { checkTradeWaste } from "../services/complianceCheck.js";
 import { generateLayout } from "../services/layout.js";
 import { estimateCost } from "../services/costing.js";
+import { processCalculations } from "../services/processCalcs.js";
 
 export function generateOutputs(inputs) {
   const profile = new WastewaterProfile(inputs);
@@ -23,6 +24,7 @@ export function generateOutputs(inputs) {
     layout: generateLayout(inputs, equipment),
     ioList: generateIOList(equipment),
     cost: estimateCost(equipment),
+    process: processCalculations(equipment),
     note: designConfig.reportNote,
   };
 }

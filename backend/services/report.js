@@ -290,6 +290,49 @@ export function buildReport(design, display = designDisplay(design)) {
               "Preliminary I/O: instruments and agitators are per tank; feed, discharge and dosing pumps are shared.",
             ],
       },
+      ...(g.process
+        ? [
+            {
+              title: "Process Calculations",
+              tables: [
+                table(
+                  [
+                    "Line",
+                    "Flow",
+                    "Required bore",
+                    "Selected size",
+                    "Velocity",
+                  ],
+                  g.process.pipes.length
+                    ? g.process.pipes.map((pipe) => [
+                        pipe.line,
+                        `${number(pipe.flowKLH)} kL/h`,
+                        `${number(pipe.requiredIdMm)} mm`,
+                        pipe.dn
+                          ? `DN${pipe.dn} (${pipe.idMm} mm bore)`
+                          : unavailable,
+                        pipe.velocity == null
+                          ? "-"
+                          : `${number(pipe.velocity)} m/s`,
+                      ])
+                    : [
+                        [
+                          "Process lines (feed / discharge)",
+                          "-",
+                          "-",
+                          unavailable,
+                          "-",
+                        ],
+                      ],
+                  [0.28, 0.14, 0.16, 0.26, 0.16],
+                ),
+              ],
+              notes: [
+                `Pipe sizing basis: pump rated flow at a maximum velocity of ${number(g.process.maxVelocity)} m/s, stainless steel Schedule 10S bores. Pump head and final line sizes to be confirmed during detailed engineering.`,
+              ],
+            },
+          ]
+        : []),
       {
         title: "2D Layout",
         layout: true,
