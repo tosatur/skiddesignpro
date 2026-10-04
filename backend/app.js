@@ -4,10 +4,15 @@ import { fileURLToPath } from "node:url";
 import { designConfig } from "./config/designConfig.js";
 import { designRoutes } from "./routes/designRoutes.js";
 import { designToolsRoutes } from "./routes/designToolsRoutes.js";
+import { priceRoutes } from "./routes/priceRoutes.js";
+import { PriceLibrary } from "./db/PriceLibrary.js";
 
 export function createApp(
   store,
-  { testToolsEnabled = process.env.SPN_ENABLE_TEST_TOOLS === "true" } = {},
+  {
+    testToolsEnabled = process.env.SPN_ENABLE_TEST_TOOLS === "true",
+    prices = new PriceLibrary(":memory:"),
+  } = {},
 ) {
   const app = express();
   app.disable("x-powered-by");
@@ -46,6 +51,7 @@ export function createApp(
   });
   app.use("/api/designs", designRoutes(store, { testToolsEnabled }));
   app.use("/api/design-tools", designToolsRoutes());
+  app.use("/api/prices", priceRoutes(prices));
   app.use("/api", (_req, res) =>
     res.status(404).json({ error: "API endpoint not found." }),
   );

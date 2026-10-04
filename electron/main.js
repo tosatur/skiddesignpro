@@ -5,6 +5,7 @@ import { basename, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createApp } from "../backend/app.js";
 import { DesignStore } from "../backend/db/DesignStore.js";
+import { PriceLibrary } from "../backend/db/PriceLibrary.js";
 import { atomicWriteFile } from "../backend/util/atomicWrite.js";
 import { desktopDatabasePath } from "./databasePath.js";
 import { listRecent, removeRecent, touchRecent } from "./recentFiles.js";
@@ -65,7 +66,10 @@ async function startDesktop() {
   });
   store = new DesignStore(databasePath);
   recentFilesPath = join(app.getPath("userData"), "recent-designs.json");
-  server = createApp(store, { testToolsEnabled }).listen(0, "127.0.0.1");
+  server = createApp(store, {
+    testToolsEnabled,
+    prices: new PriceLibrary(databasePath),
+  }).listen(0, "127.0.0.1");
   await once(server, "listening");
   const origin = `http://127.0.0.1:${server.address().port}`;
 
@@ -142,9 +146,7 @@ async function startDesktop() {
       defaultPath: join(defaultDesignDir, `${safeName}.spnd`),
       filters: DESIGN_FILE_FILTERS,
     });
-    return result.canceled
-      ? null
-      : saveDesignAtPath(result.filePath, design);
+    return result.canceled ? null : saveDesignAtPath(result.filePath, design);
   });
   ipcMain.handle("recent:list", () => listRecent(recentFilesPath));
   ipcMain.handle("recent:remove", (_event, path) => {
