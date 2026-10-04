@@ -251,7 +251,9 @@ function drawEquipment(item, { shapes, text, rect }) {
         ? item.details.split(" ")
         : ["causticDosingPump", "acidDosingPump"].includes(item.equipmentId)
           ? [item.details.split(" ")[0], item.details.match(/\((.+)\)/)?.[1]]
-          : [item.name, item.rating]);
+          : item.equipmentId === "coolingHx"
+            ? ["Cooling HX", item.rating?.split(" to ")[0]]
+            : [item.name, item.rating]);
     const fontSize = Math.min(
       15,
       item.length /
