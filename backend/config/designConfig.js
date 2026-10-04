@@ -113,6 +113,7 @@ export const designConfig = {
     actuatedValves: 2,
     recirculationLines: 1,
   },
+  tagging: { plant: "100" },
   chemicals: [
     { id: "naoh", name: "Sodium Hydroxide (NaOH)", type: "caustic" },
     { id: "hcl", name: "Hydrochloric Acid (HCl)", type: "acid" },

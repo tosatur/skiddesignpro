@@ -1,4 +1,5 @@
 import { designConfig } from "../config/designConfig.js";
+import { assignTags } from "./tagging.js";
 
 export function selectChemical(inputs) {
   const direction = Math.sign(inputs.targetPH - inputs.inletPH);
@@ -168,6 +169,7 @@ export function selectEquipment(inputs, dosing) {
   const equipment = { tank, pump, items, sizing };
   for (const item of items)
     item.details = equipmentDetails(item, equipment, dosing);
+  assignTags(items, tank.count);
   return equipment;
 }
 

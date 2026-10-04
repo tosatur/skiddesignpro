@@ -509,6 +509,11 @@ dd {
 .equipment-panel h2 {
   padding: 25px 28px 22px;
 }
+.equipment-panel .tags {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.85em;
+  color: var(--color-text-muted);
+}
 .panel-stack {
   display: grid;
   gap: 22px;
