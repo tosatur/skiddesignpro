@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import PageHeading from "../components/PageHeading.jsx";
 import { designService } from "../services/designService.js";
 import { date, money } from "../services/format.js";
@@ -9,6 +9,9 @@ function PriceEditor({ price, busy, onSave, onCancel }) {
   return (
     <form
       className="quote-form"
+      onKeyDown={(event) => {
+        if (event.key === "Escape") onCancel();
+      }}
       onSubmit={(event) => {
         event.preventDefault();
         onSave({ unitCost: Number(unitCost), quoteRef, status: "quoted" });
@@ -53,6 +56,14 @@ export default function PricesPage() {
   const [error, setError] = useState("");
   const [editing, setEditing] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [returnFocus, setReturnFocus] = useState(null);
+  const table = useRef(null);
+
+  useEffect(() => {
+    if (!returnFocus || editing || busy) return;
+    table.current?.querySelector(`[data-price-key="${returnFocus}"]`)?.focus();
+    setReturnFocus(null);
+  }, [returnFocus, editing, busy, prices]);
 
   useEffect(() => {
     designService
@@ -70,6 +81,7 @@ export default function PricesPage() {
         list.map((price) => (price.key === updated.key ? updated : price)),
       );
       setEditing(null);
+      setReturnFocus(updated.key);
     } catch (e) {
       setError(e.message);
     } finally {
@@ -91,7 +103,7 @@ export default function PricesPage() {
       {!prices ? (
         !error && <div className="loading">Loading prices…</div>
       ) : (
-        <section className="card quote-panel prices-card">
+        <section className="card quote-panel prices-card" ref={table}>
           <div className="table-scroll">
             <table>
               <thead>
@@ -132,7 +144,10 @@ export default function PricesPage() {
                         <PriceEditor
                           price={price}
                           busy={busy}
-                          onCancel={() => setEditing(null)}
+                          onCancel={() => {
+                            setEditing(null);
+                            setReturnFocus(price.key);
+                          }}
                           onSave={(body) =>
                             change(() =>
                               designService.setPrice(price.key, body),
@@ -145,6 +160,8 @@ export default function PricesPage() {
                             type="button"
                             className="button subtle"
                             disabled={busy}
+                            aria-label={`Enter quote for ${price.label}`}
+                            data-price-key={price.key}
                             onClick={() => setEditing(price.key)}
                           >
                             Enter quote
@@ -154,6 +171,7 @@ export default function PricesPage() {
                               type="button"
                               className="button subtle"
                               disabled={busy}
+                              aria-label={`Reset ${price.label} to estimate`}
                               onClick={() =>
                                 change(() =>
                                   designService.resetPrice(price.key),

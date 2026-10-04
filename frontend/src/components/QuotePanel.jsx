@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { designService } from "../services/designService.js";
 import { money } from "../services/format.js";
 
@@ -15,6 +15,9 @@ function QuoteForm({ line, currency, busy, onSave, onCancel }) {
   return (
     <form
       className="quote-form"
+      onKeyDown={(event) => {
+        if (event.key === "Escape") onCancel();
+      }}
       onSubmit={(event) => {
         event.preventDefault();
         onSave({ unitCost: Number(unitCost), quoteRef, toLibrary });
@@ -70,8 +73,21 @@ export default function QuotePanel({ design, onChanged }) {
   const [editing, setEditing] = useState(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [returnFocus, setReturnFocus] = useState(null);
+  const panel = useRef(null);
 
-  async function saveOverrides(next, libraryPrice) {
+  useEffect(() => {
+    if (!returnFocus || editing || busy) return;
+    panel.current?.querySelector(`[data-quote-line="${returnFocus}"]`)?.focus();
+    setReturnFocus(null);
+  }, [returnFocus, editing, busy, design]);
+
+  const close = (lineId) => {
+    setEditing(null);
+    setReturnFocus(lineId);
+  };
+
+  async function saveOverrides(lineId, next, libraryPrice) {
     setBusy(true);
     setMessage("");
     try {
@@ -97,13 +113,13 @@ export default function QuotePanel({ design, onChanged }) {
           `Quote saved to this design, but not to the price library: ${error.message}`,
         );
       }
-    setEditing(null);
+    close(lineId);
     setBusy(false);
     onChanged();
   }
 
   return (
-    <section className="card quote-panel">
+    <section className="card quote-panel" ref={panel}>
       <div className="quote-heading">
         <h2>Cost breakdown</h2>
         {cost.complete && cost.quotedShare != null && (
@@ -165,9 +181,10 @@ export default function QuotePanel({ design, onChanged }) {
                       line={line}
                       currency={cost.currency}
                       busy={busy}
-                      onCancel={() => setEditing(null)}
+                      onCancel={() => close(line.id)}
                       onSave={({ unitCost, quoteRef, toLibrary }) =>
                         saveOverrides(
+                          line.id,
                           { ...overrides, [line.id]: { unitCost, quoteRef } },
                           toLibrary && line.priceKey
                             ? { key: line.priceKey, unitCost, quoteRef }
@@ -182,6 +199,8 @@ export default function QuotePanel({ design, onChanged }) {
                           type="button"
                           className="button subtle"
                           disabled={busy}
+                          aria-label={`Enter quote for ${line.name}`}
+                          data-quote-line={line.id}
                           onClick={() => setEditing(line.id)}
                         >
                           Enter quote
@@ -192,9 +211,10 @@ export default function QuotePanel({ design, onChanged }) {
                           type="button"
                           className="button subtle"
                           disabled={busy}
+                          aria-label={`Remove quote for ${line.name}`}
                           onClick={() => {
                             const { [line.id]: _removed, ...rest } = overrides;
-                            saveOverrides(rest, null);
+                            saveOverrides(line.id, rest, null);
                           }}
                         >
                           Remove quote
