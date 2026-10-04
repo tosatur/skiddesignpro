@@ -42,14 +42,16 @@ function QuoteForm({ line, currency, busy, onSave, onCancel }) {
           onChange={(e) => setQuoteRef(e.target.value)}
         />
       </label>
-      <label className="quote-library">
-        <input
-          type="checkbox"
-          checked={toLibrary}
-          onChange={(e) => setToLibrary(e.target.checked)}
-        />
-        <span>Also save to price library for future designs</span>
-      </label>
+      {line.priceKey && (
+        <label className="quote-library">
+          <input
+            type="checkbox"
+            checked={toLibrary}
+            onChange={(e) => setToLibrary(e.target.checked)}
+          />
+          <span>Also save to price library for future designs</span>
+        </label>
+      )}
       <div className="quote-actions">
         <button type="button" className="button" onClick={onCancel}>
           Cancel
@@ -78,19 +80,26 @@ export default function QuotePanel({ design, onChanged }) {
         { ...design.inputs, priceOverrides: next },
         design.revision,
       );
-      if (libraryPrice)
+    } catch (error) {
+      setMessage(error.message);
+      setBusy(false);
+      return;
+    }
+    if (libraryPrice)
+      try {
         await designService.setPrice(libraryPrice.key, {
           unitCost: libraryPrice.unitCost,
           quoteRef: libraryPrice.quoteRef,
           status: "quoted",
         });
-      setEditing(null);
-      onChanged();
-    } catch (error) {
-      setMessage(error.message);
-    } finally {
-      setBusy(false);
-    }
+      } catch (error) {
+        setMessage(
+          `Quote saved to this design, but not to the price library: ${error.message}`,
+        );
+      }
+    setEditing(null);
+    setBusy(false);
+    onChanged();
   }
 
   return (
@@ -168,14 +177,16 @@ export default function QuotePanel({ design, onChanged }) {
                     />
                   ) : (
                     <div className="quote-actions">
-                      <button
-                        type="button"
-                        className="button"
-                        disabled={busy}
-                        onClick={() => setEditing(line.id)}
-                      >
-                        Enter quote
-                      </button>
+                      {line.quantity != null && (
+                        <button
+                          type="button"
+                          className="button"
+                          disabled={busy}
+                          onClick={() => setEditing(line.id)}
+                        >
+                          Enter quote
+                        </button>
+                      )}
                       {overrides[line.id] && (
                         <button
                           type="button"

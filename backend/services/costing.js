@@ -16,9 +16,13 @@ const PACKAGED = [
 
 const priceKey = (id, equipment) =>
   id === "tank"
-    ? `tank:${equipment.tank.sizeKL}`
+    ? equipment.tank.sizeKL
+      ? `tank:${equipment.tank.sizeKL}`
+      : null
     : ["feedPump", "dischargePump"].includes(id)
-      ? `pump:${equipment.pump.flowKLH}`
+      ? equipment.pump.flowKLH
+        ? `pump:${equipment.pump.flowKLH}`
+        : null
       : DOSING_PUMPS.includes(id)
         ? "dosingPump"
         : id === "controlPanel"
