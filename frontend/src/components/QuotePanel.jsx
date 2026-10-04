@@ -124,8 +124,8 @@ export default function QuotePanel({ design, onChanged }) {
             <tr>
               <th>Component</th>
               <th>Qty</th>
-              <th>Unit cost</th>
-              <th>Amount</th>
+              <th className="num">Unit cost</th>
+              <th className="num">Amount</th>
               <th>Basis</th>
               <th>
                 <span className="visually-hidden">Actions</span>
@@ -137,12 +137,12 @@ export default function QuotePanel({ design, onChanged }) {
               <tr key={line.id}>
                 <td>{line.name}</td>
                 <td>{line.quantity ?? "-"}</td>
-                <td>
+                <td className="num">
                   {line.unitCost == null
                     ? "-"
                     : money(line.unitCost, cost.currency)}
                 </td>
-                <td>
+                <td className="num">
                   {line.amount == null
                     ? "-"
                     : money(line.amount, cost.currency)}
@@ -180,7 +180,7 @@ export default function QuotePanel({ design, onChanged }) {
                       {line.quantity != null && (
                         <button
                           type="button"
-                          className="button"
+                          className="button subtle"
                           disabled={busy}
                           onClick={() => setEditing(line.id)}
                         >
@@ -190,7 +190,7 @@ export default function QuotePanel({ design, onChanged }) {
                       {overrides[line.id] && (
                         <button
                           type="button"
-                          className="button"
+                          className="button subtle"
                           disabled={busy}
                           onClick={() => {
                             const { [line.id]: _removed, ...rest } = overrides;
@@ -206,6 +206,36 @@ export default function QuotePanel({ design, onChanged }) {
               </tr>
             ))}
           </tbody>
+          {cost.complete && (
+            <tfoot>
+              <tr>
+                <th scope="row" colSpan={3}>
+                  Subtotal
+                </th>
+                <td className="num">{money(cost.subtotal, cost.currency)}</td>
+                <td colSpan={2} />
+              </tr>
+              {cost.quoted > 0 && (
+                <tr>
+                  <th scope="row" colSpan={3}>
+                    Quoted portion
+                  </th>
+                  <td className="num">{money(cost.quoted, cost.currency)}</td>
+                  <td colSpan={2} />
+                </tr>
+              )}
+              <tr>
+                <th scope="row" colSpan={3}>
+                  Estimated range
+                </th>
+                <td className="num nowrap">
+                  {money(cost.low, cost.currency)}–
+                  {money(cost.high, cost.currency)}
+                </td>
+                <td colSpan={2} />
+              </tr>
+            </tfoot>
+          )}
         </table>
       </div>
     </section>

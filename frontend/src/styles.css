@@ -549,6 +549,35 @@ dd {
 .quote-heading h2 {
   margin: 0;
 }
+.quote-panel .num {
+  text-align: right;
+}
+.quote-panel .nowrap {
+  white-space: nowrap;
+}
+.quote-panel tfoot th,
+.quote-panel tfoot td {
+  border-top: 1px solid var(--color-border);
+  border-bottom: 0;
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+  font-weight: 600;
+}
+.quote-panel tfoot tr + tr th,
+.quote-panel tfoot tr + tr td {
+  border-top-color: var(--color-border-subtle);
+}
+.button.subtle {
+  min-height: 30px;
+  padding: 5px 10px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--color-accent);
+}
+.button.subtle:hover {
+  background: var(--color-surface-alt);
+  border-color: var(--color-border-subtle);
+}
 .quote-panel .notice {
   margin: 0 28px 16px;
 }
