@@ -97,8 +97,8 @@ export default function PricesPage() {
               <thead>
                 <tr>
                   <th>Item</th>
-                  <th>Estimate</th>
-                  <th>Current price</th>
+                  <th className="num">Estimate</th>
+                  <th className="num">Current price</th>
                   <th>Basis</th>
                   <th>Updated</th>
                   <th>
@@ -110,8 +110,8 @@ export default function PricesPage() {
                 {prices.map((price) => (
                   <tr key={price.key}>
                     <td>{price.label}</td>
-                    <td>{money(price.estimate, "AUD")}</td>
-                    <td>{money(price.unitCost, "AUD")}</td>
+                    <td className="num">{money(price.estimate, "AUD")}</td>
+                    <td className="num">{money(price.unitCost, "AUD")}</td>
                     <td>
                       <span
                         className={`status ${price.status === "quoted" ? "within" : "unknown"}`}
@@ -143,7 +143,7 @@ export default function PricesPage() {
                         <div className="quote-actions">
                           <button
                             type="button"
-                            className="button"
+                            className="button subtle"
                             disabled={busy}
                             onClick={() => setEditing(price.key)}
                           >
@@ -152,7 +152,7 @@ export default function PricesPage() {
                           {price.status === "quoted" && (
                             <button
                               type="button"
-                              className="button"
+                              className="button subtle"
                               disabled={busy}
                               onClick={() =>
                                 change(() =>
