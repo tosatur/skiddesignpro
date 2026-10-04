@@ -11,6 +11,12 @@ export default function DosingPanel({ dosing }) {
           <dt>Chemical</dt>
           <dd>{dosing.chemical?.name ?? "None required"}</dd>
         </div>
+        {dosing.trains?.length > 0 && (
+          <div>
+            <dt>Dosing trains</dt>
+            <dd>{dosing.trains.map((c) => c.name).join(", ")}</dd>
+          </div>
+        )}
         <div>
           <dt>Control</dt>
           <dd>{dosing.control}</dd>

@@ -1,6 +1,8 @@
 import { designConfig } from "../config/designConfig.js";
 import { drawLayout } from "./layoutDrawing.js";
 
+const DOSING_PUMPS = ["dosingPump", "causticDosingPump", "acidDosingPump"];
+
 const roundUp = (value, increment) =>
   Number((Math.ceil((value - 1e-9) / increment) * increment).toFixed(6));
 
@@ -9,7 +11,9 @@ function physicalEquipment(equipment, config) {
     tank: config.tankFootprints[equipment.tank.sizeKL],
     feedPump: config.pumpFootprints[equipment.pump.flowKLH],
     dischargePump: config.pumpFootprints[equipment.pump.flowKLH],
-    dosingPump: config.dosingPumpFootprint,
+    ...Object.fromEntries(
+      DOSING_PUMPS.map((id) => [id, config.dosingPumpFootprint]),
+    ),
     controlPanel: config.controlPanelFootprint,
   };
   const mountedLabels = {
@@ -120,7 +124,7 @@ function layoutCandidates(items, config) {
   const rowGap = config.spacing.betweenRows;
   const tanks = group(select("tank"), false, gap);
   const auxiliary = group(
-    select("feedPump", "dosingPump", "controlPanel", "dischargePump"),
+    select("feedPump", ...DOSING_PUMPS, "controlPanel", "dischargePump"),
     false,
     gap,
   );
@@ -138,7 +142,7 @@ function layoutCandidates(items, config) {
     config,
   );
 
-  const left = group(select("feedPump", "dosingPump"), true, gap);
+  const left = group(select("feedPump", ...DOSING_PUMPS), true, gap);
   const right = group(select("dischargePump", "controlPanel"), true, gap);
   const innerWidth = Math.max(tanks.width, left.width, right.width);
   const tankX = left.items.length ? left.length + rowGap : 0;
@@ -174,7 +178,7 @@ function processConnections(items) {
       add(tanks.at(-1).key, item.key);
       add(item.key, "outlet");
     }
-    if (item.equipmentId === "dosingPump")
+    if (DOSING_PUMPS.includes(item.equipmentId))
       add(item.key, tanks[0].key, "chemical");
   }
   return connections;

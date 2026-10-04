@@ -151,9 +151,20 @@ export default function DesignForm({
             onChange={(value) => set("customWastewaterData", value)}
             calculatedSulphur={calculatedSulphur}
           />
-          {direction === -1 && (
+          <div className="form-grid">
             <div className="field chemical-field">
-              <label htmlFor="acid">Acid candidate</label>
+              <label htmlFor="caustic">Caustic train</label>
+              <input
+                id="caustic"
+                value={config.chemicals.find((c) => c.type === "caustic").name}
+                readOnly
+              />
+              <p className="muted small">
+                Raises pH{direction === 1 ? " · main correction" : ""}
+              </p>
+            </div>
+            <div className="field chemical-field">
+              <label htmlFor="acid">Acid train</label>
               <select
                 id="acid"
                 value={form.acidId}
@@ -167,20 +178,11 @@ export default function DesignForm({
                     </option>
                   ))}
               </select>
-              <p className="muted small">Used when lowering pH</p>
+              <p className="muted small">
+                Lowers pH{direction === -1 ? " · main correction" : ""}
+              </p>
             </div>
-          )}
-          {direction === 1 && (
-            <div className="field chemical-field">
-              <label htmlFor="caustic">Caustic candidate</label>
-              <input
-                id="caustic"
-                value={config.chemicals.find((c) => c.type === "caustic").name}
-                readOnly
-              />
-              <p className="muted small">Used when raising pH</p>
-            </div>
-          )}
+          </div>
           {direction === 0 && (
             <p className="muted small chemical-field">
               Inlet pH equals target pH. No pH correction direction is currently

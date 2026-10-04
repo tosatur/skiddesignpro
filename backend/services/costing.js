@@ -1,5 +1,7 @@
 import { designConfig } from "../config/designConfig.js";
 
+const DOSING_PUMPS = ["dosingPump", "causticDosingPump", "acidDosingPump"];
+
 export function estimateCost(equipment) {
   const costs = designConfig.costs;
   const lines = equipment.items
@@ -13,7 +15,9 @@ export function estimateCost(equipment) {
           ? costs.tanks[equipment.tank.sizeKL]
           : ["feedPump", "dischargePump"].includes(item.id)
             ? costs.pumps[equipment.pump.flowKLH]
-            : costs[item.id];
+            : DOSING_PUMPS.includes(item.id)
+              ? costs.dosingPump
+              : costs[item.id];
       return {
         id: item.id,
         name:
@@ -21,7 +25,11 @@ export function estimateCost(equipment) {
             ? "pH instrumentation"
             : item.id === "dosingPump"
               ? "Chemical dosing system"
-              : item.name,
+              : item.id === "causticDosingPump"
+                ? "Caustic dosing system"
+                : item.id === "acidDosingPump"
+                  ? "Acid dosing system"
+                  : item.name,
         quantity: item.quantity,
         unitCost: unitCost ?? null,
         amount:

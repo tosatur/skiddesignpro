@@ -153,6 +153,14 @@ export function buildReport(design, display = designDisplay(design)) {
                 `${g.dosing.correction}${g.dosing.chemical ? " to selected operating target" : " at selected operating target"}`,
               ],
               ["Chemical", display.dosing.chemical?.name ?? "None required"],
+              ...(g.dosing.trains?.length
+                ? [
+                    [
+                      "Dosing trains fitted",
+                      g.dosing.trains.map((c) => c.name).join("; "),
+                    ],
+                  ]
+                : []),
               ["Control method", display.dosing.control],
               ...(g.dosing.chemical
                 ? [
@@ -215,7 +223,7 @@ export function buildReport(design, display = designDisplay(design)) {
           ),
         ],
         notes: [
-          "Preliminary I/O: instruments and agitators are per tank; feed, discharge and selected dosing pumps are shared.",
+          "Preliminary I/O: instruments and agitators are per tank; feed, discharge and dosing pumps are shared.",
         ],
       },
       {

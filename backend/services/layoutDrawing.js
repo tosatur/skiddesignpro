@@ -244,7 +244,9 @@ function drawEquipment(item, { shapes, text, rect }) {
         ? ["Control Panel", "/ HMI"]
         : item.equipmentId === "dosingPump"
           ? item.details.split(" ")
-          : [item.name, item.rating];
+          : ["causticDosingPump", "acidDosingPump"].includes(item.equipmentId)
+            ? [item.details.split(" ")[0], item.details.match(/\((.+)\)/)?.[1]]
+            : [item.name, item.rating];
     const fontSize = Math.min(
       15,
       item.length /

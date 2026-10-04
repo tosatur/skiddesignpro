@@ -104,7 +104,8 @@ export const designConfig = {
     lowLevelSwitchesPerTank: 1,
     highLevelSwitchesPerTank: 1,
     controlPanels: 1,
-    dosingPumps: 1,
+    causticDosingPumps: 1,
+    acidDosingPumps: 1,
   },
   chemicals: [
     { id: "naoh", name: "Sodium Hydroxide (NaOH)", type: "caustic" },

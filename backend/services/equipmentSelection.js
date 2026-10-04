@@ -8,10 +8,15 @@ export function selectChemical(inputs) {
       : direction < 0
         ? inputs.acidId
         : null;
+  const trains = [
+    designConfig.chemicals.find((c) => c.type === "caustic"),
+    designConfig.chemicals.find((c) => c.id === inputs.acidId),
+  ].filter(Boolean);
   return {
     correction:
       direction > 0 ? "Raise pH" : direction < 0 ? "Lower pH" : "Maintain pH",
     chemical: designConfig.chemicals.find((c) => c.id === id) ?? null,
+    trains,
     capacityLH: null,
     control: direction === 0 ? "pH monitoring" : "pH feedback",
   };
@@ -96,20 +101,31 @@ export function selectEquipment(inputs, dosing) {
     null,
     "Input",
   );
-  if (dosing.chemical)
-    add(
-      "dosingPump",
-      "Chemical dosing pump",
-      quantities.dosingPumps,
-      null,
-      "Output",
-    );
+  add(
+    "causticDosingPump",
+    "Caustic dosing pump",
+    quantities.causticDosingPumps,
+    null,
+    "Output",
+  );
+  add(
+    "acidDosingPump",
+    "Acid dosing pump",
+    quantities.acidDosingPumps,
+    null,
+    "Output",
+  );
   add("controlPanel", "Control panel / HMI", quantities.controlPanels, null);
   const equipment = { tank, pump, items, sizing };
   for (const item of items)
     item.details = equipmentDetails(item, equipment, dosing);
   return equipment;
 }
+
+const chemicalName = (dosing, type) => {
+  const chemical = dosing.trains?.find((c) => c.type === type);
+  return chemical?.name.match(/\((.+)\)/)?.[1] ?? chemical?.name ?? type;
+};
 
 // Also describes older saved selections without selecting any new equipment.
 export function equipmentDetails(item, equipment, dosing) {
@@ -131,6 +147,10 @@ export function equipmentDetails(item, equipment, dosing) {
         : `${perTank} per tank`
       : "Tank-mounted";
   }
+  if (item.id === "causticDosingPump")
+    return `Caustic dosing (${chemicalName(dosing, "caustic")})`;
+  if (item.id === "acidDosingPump")
+    return `Acid dosing (${chemicalName(dosing, "acid")})`;
   if (item.id === "dosingPump")
     return dosing.chemical?.type === "acid"
       ? "Acid dosing"
