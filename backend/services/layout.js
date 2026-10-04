@@ -16,6 +16,7 @@ function physicalEquipment(equipment, config) {
     ),
     dosingController: config.dosingControllerFootprint,
     skidController: config.skidControllerFootprint,
+    coolingHx: config.coolingHxFootprint,
   };
   const mountedLabels = {
     agitator: "Agitator",
@@ -130,6 +131,7 @@ function layoutCandidates(items, config) {
       ...DOSING_PUMPS,
       "dosingController",
       "skidController",
+      "coolingHx",
       "dischargePump",
     ),
     false,
@@ -154,7 +156,11 @@ function layoutCandidates(items, config) {
     true,
     gap,
   );
-  const right = group(select("dischargePump", "skidController"), true, gap);
+  const right = group(
+    select("dischargePump", "coolingHx", "skidController"),
+    true,
+    gap,
+  );
   const innerWidth = Math.max(tanks.width, left.width, right.width);
   const tankX = left.items.length ? left.length + rowGap : 0;
   const ends = frame(

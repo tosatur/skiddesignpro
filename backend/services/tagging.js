@@ -19,6 +19,7 @@ const SEQUENCED = {
   nonReturnValve: "NRV",
   pressureReliefValve: "PRV",
   actuatedValve: "AV",
+  coolingHx: "HX",
 };
 
 const pad = (number) => String(number).padStart(2, "0");

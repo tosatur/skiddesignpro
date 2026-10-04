@@ -326,9 +326,36 @@ export function buildReport(design, display = designDisplay(design)) {
                       ],
                   [0.28, 0.14, 0.16, 0.26, 0.16],
                 ),
+                ...(g.process.cooling
+                  ? [
+                      table(
+                        ["Cooling", "Value"],
+                        [
+                          [
+                            "Design flow",
+                            `${number(g.process.cooling.flowKLH)} kL/h`,
+                          ],
+                          [
+                            "Inlet / target temperature",
+                            `${number(g.process.cooling.inletC)} °C / ${number(g.process.cooling.targetC)} °C`,
+                          ],
+                          [
+                            "Cooling duty",
+                            `${number(g.process.cooling.dutyKW)} kW`,
+                          ],
+                        ],
+                        [0.4, 0.6],
+                      ),
+                    ]
+                  : []),
               ],
               notes: [
                 `Pipe sizing basis: pump rated flow at a maximum velocity of ${number(g.process.maxVelocity)} m/s, stainless steel Schedule 10S bores. Pump head and final line sizes to be confirmed during detailed engineering.`,
+                ...(g.process.cooling
+                  ? [
+                      "Cooling duty basis: Q = ṁ × cp × ΔT at the design flow, with water properties (1,000 kg/m³, 4.18 kJ/kg·K). Exchanger type, cooling medium and approach temperature to be confirmed.",
+                    ]
+                  : []),
               ],
             },
           ]

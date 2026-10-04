@@ -19,12 +19,26 @@ export function sizePipe(flowKLH) {
   };
 }
 
-export function processCalculations(equipment) {
+export function coolingDuty(inputs) {
+  const targetC = designConfig.tradeWasteLimits.temperature.max;
+  if (inputs.temperature <= targetC) return null;
+  const { densityKgM3, cpKJkgK } = designConfig.fluid;
+  const massFlow = (inputs.flowRate * densityKgM3) / 3600;
+  return {
+    flowKLH: inputs.flowRate,
+    inletC: inputs.temperature,
+    targetC,
+    dutyKW: round(massFlow * cpKJkgK * (inputs.temperature - targetC), 1),
+  };
+}
+
+export function processCalculations(inputs, equipment) {
   const flowKLH = equipment.pump.flowKLH;
   return {
     pipes: flowKLH
       ? [{ line: "Process lines (feed / discharge)", ...sizePipe(flowKLH) }]
       : [],
     maxVelocity: designConfig.piping.maxVelocity,
+    cooling: coolingDuty(inputs),
   };
 }

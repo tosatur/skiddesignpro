@@ -3,6 +3,7 @@ import {
   formatMeasurement,
   sumSulphurComponents,
 } from "../../shared/measurements.js";
+import { coolingDuty } from "./processCalcs.js";
 
 const WITHIN = "Within Limit",
   OUTSIDE = "Outside Limit",
@@ -50,6 +51,10 @@ export function checkTradeWaste(inputs, profile) {
     inputs.temperature <= limits.temperature.max ? WITHIN : OUTSIDE,
     limits.temperature.reference,
   );
+  const cooling = coolingDuty(inputs);
+  if (cooling)
+    results.at(-1).explanation =
+      `Temperature: cooling of about ${cooling.dutyKW.toLocaleString("en-AU")} kW is required to bring the design flow to ${cooling.targetC} °C before discharge. A cooling heat exchanger has been added to the equipment.`;
   for (const [key, label] of [
     ["bod", "BOD5"],
     ["tss", "Suspended solids"],

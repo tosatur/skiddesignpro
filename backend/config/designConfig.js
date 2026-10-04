@@ -113,6 +113,7 @@ export const designConfig = {
     actuatedValves: 2,
     recirculationLines: 1,
   },
+  fluid: { densityKgM3: 1000, cpKJkgK: 4.18 },
   piping: {
     maxVelocity: 2.5,
     sizes: [
@@ -186,6 +187,7 @@ export const designConfig = {
     dosingPumpFootprint: { length: 0.4, width: 0.3 },
     dosingControllerFootprint: { length: 0.6, width: 0.35 },
     skidControllerFootprint: { length: 0.8, width: 0.45 },
+    coolingHxFootprint: { length: 1.0, width: 0.5 },
     spacing: { betweenItems: 0.25, betweenRows: 0.25 },
     frameMargins: { length: 0.15, width: 0.15 },
     dimensionIncrement: 0.05,
@@ -216,6 +218,7 @@ export const designConfig = {
     fabrication: 3500,
     // Existing assembly allowance now explicitly covers piping, valves and assembly.
     pipingValvesAssembly: 2000,
+    coolingHx: 15000,
   },
   defaults: { targetPH: 7, acidId: "hcl", wastewaterProfile: "typical" },
   // Form bounds only; these are not engineering design limits.

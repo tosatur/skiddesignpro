@@ -1,5 +1,6 @@
 import { designConfig } from "../config/designConfig.js";
 import { assignTags } from "./tagging.js";
+import { coolingDuty } from "./processCalcs.js";
 
 export function selectChemical(inputs) {
   const direction = Math.sign(inputs.targetPH - inputs.inletPH);
@@ -170,6 +171,14 @@ export function selectEquipment(inputs, dosing) {
     quantities.recirculationLines,
     null,
   );
+  const cooling = coolingDuty(inputs);
+  if (cooling)
+    add(
+      "coolingHx",
+      "Cooling heat exchanger",
+      1,
+      `${cooling.dutyKW} kW to ${cooling.targetC} °C`,
+    );
   const equipment = { tank, pump, items, sizing };
   for (const item of items)
     item.details = equipmentDetails(item, equipment, dosing);

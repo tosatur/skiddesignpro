@@ -24,7 +24,7 @@ export function generateOutputs(inputs) {
     layout: generateLayout(inputs, equipment),
     ioList: generateIOList(equipment),
     cost: estimateCost(equipment),
-    process: processCalculations(equipment),
+    process: processCalculations(inputs, equipment),
     note: designConfig.reportNote,
   };
 }
