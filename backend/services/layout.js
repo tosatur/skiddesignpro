@@ -14,7 +14,8 @@ function physicalEquipment(equipment, config) {
     ...Object.fromEntries(
       DOSING_PUMPS.map((id) => [id, config.dosingPumpFootprint]),
     ),
-    controlPanel: config.controlPanelFootprint,
+    dosingController: config.dosingControllerFootprint,
+    skidController: config.skidControllerFootprint,
   };
   const mountedLabels = {
     agitator: "Agitator",
@@ -124,7 +125,13 @@ function layoutCandidates(items, config) {
   const rowGap = config.spacing.betweenRows;
   const tanks = group(select("tank"), false, gap);
   const auxiliary = group(
-    select("feedPump", ...DOSING_PUMPS, "controlPanel", "dischargePump"),
+    select(
+      "feedPump",
+      ...DOSING_PUMPS,
+      "dosingController",
+      "skidController",
+      "dischargePump",
+    ),
     false,
     gap,
   );
@@ -142,8 +149,12 @@ function layoutCandidates(items, config) {
     config,
   );
 
-  const left = group(select("feedPump", ...DOSING_PUMPS), true, gap);
-  const right = group(select("dischargePump", "controlPanel"), true, gap);
+  const left = group(
+    select("feedPump", ...DOSING_PUMPS, "dosingController"),
+    true,
+    gap,
+  );
+  const right = group(select("dischargePump", "skidController"), true, gap);
   const innerWidth = Math.max(tanks.width, left.width, right.width);
   const tankX = left.items.length ? left.length + rowGap : 0;
   const ends = frame(

@@ -204,6 +204,12 @@ function drawConnections(layout, boxes, { left, width }, pen) {
   }
 }
 
+const CONTROLLERS = {
+  controlPanel: ["Control Panel", "/ HMI"],
+  dosingController: ["Dosing", "controller"],
+  skidController: ["Skid controller", "/ HMI"],
+};
+
 function drawEquipment(item, { shapes, text, rect }) {
   const cx = item.x + item.length / 2,
     cy = item.y + item.width / 2;
@@ -236,17 +242,16 @@ function drawEquipment(item, { shapes, text, rect }) {
       item.y,
       item.length,
       item.width,
-      item.equipmentId === "controlPanel" ? "#edf0f4" : "#fff",
+      CONTROLLERS[item.equipmentId] ? "#edf0f4" : "#fff",
       item.equipmentId,
     );
     const labels =
-      item.equipmentId === "controlPanel"
-        ? ["Control Panel", "/ HMI"]
-        : item.equipmentId === "dosingPump"
-          ? item.details.split(" ")
-          : ["causticDosingPump", "acidDosingPump"].includes(item.equipmentId)
-            ? [item.details.split(" ")[0], item.details.match(/\((.+)\)/)?.[1]]
-            : [item.name, item.rating];
+      CONTROLLERS[item.equipmentId] ??
+      (item.equipmentId === "dosingPump"
+        ? item.details.split(" ")
+        : ["causticDosingPump", "acidDosingPump"].includes(item.equipmentId)
+          ? [item.details.split(" ")[0], item.details.match(/\((.+)\)/)?.[1]]
+          : [item.name, item.rating]);
     const fontSize = Math.min(
       15,
       item.length /

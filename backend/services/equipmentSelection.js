@@ -115,7 +115,18 @@ export function selectEquipment(inputs, dosing) {
     null,
     "Output",
   );
-  add("controlPanel", "Control panel / HMI", quantities.controlPanels, null);
+  add(
+    "dosingController",
+    "Dosing controller",
+    quantities.dosingControllers,
+    null,
+  );
+  add(
+    "skidController",
+    "Skid controller / HMI",
+    quantities.skidControllers,
+    null,
+  );
   const equipment = { tank, pump, items, sizing };
   for (const item of items)
     item.details = equipmentDetails(item, equipment, dosing);
@@ -158,6 +169,8 @@ export function equipmentDetails(item, equipment, dosing) {
         ? "Caustic dosing"
         : "pH feedback dosing";
   if (item.id === "controlPanel") return "Skid control";
+  if (item.id === "dosingController") return "pH control of dosing trains";
+  if (item.id === "skidController") return "Level, pump and sequence control";
   return "Flow outside selection range";
 }
 
