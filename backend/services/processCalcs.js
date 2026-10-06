@@ -36,9 +36,19 @@ export function processCalculations(inputs, equipment) {
   const flowKLH = equipment.pump.flowKLH;
   return {
     pipes: flowKLH
-      ? [{ line: "Process lines (feed / discharge)", ...sizePipe(flowKLH) }]
+      ? [
+          {
+            line: `Process lines (${equipment.items
+              .filter((item) => ["feedPump", "dischargePump"].includes(item.id))
+              .map((item) => (item.id === "feedPump" ? "feed" : "discharge"))
+              .join(" / ")})`,
+            ...sizePipe(flowKLH),
+          },
+        ]
       : [],
     maxVelocity: designConfig.piping.maxVelocity,
-    cooling: coolingDuty(inputs),
+    cooling: equipment.items.some((item) => item.id === "coolingHx")
+      ? coolingDuty(inputs)
+      : null,
   };
 }

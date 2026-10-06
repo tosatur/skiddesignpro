@@ -12,6 +12,7 @@ export default function DesignForm({
   onSave,
   cancelTo,
   deleteAction,
+  submitLabel = initial ? "Save Changes" : "Generate Design",
 }) {
   const [config, setConfig] = useState(null);
   const [loadError, setLoadError] = useState("");
@@ -211,7 +212,7 @@ export default function DesignForm({
           Cancel
         </Link>
         <button type="submit" className="button primary" disabled={busy}>
-          {busy ? "Saving…" : initial ? "Save Changes" : "Generate Design"}
+          {busy ? "Saving…" : submitLabel}
         </button>
       </div>
     </form>

@@ -1,7 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
 import { number, date } from "../services/format.js";
 
-export default function SavedDesignTable({ designs }) {
+export default function SavedDesignTable({
+  designs,
+  onDuplicate,
+  duplicating,
+}) {
   const navigate = useNavigate();
   return (
     <div className="table-scroll">
@@ -13,6 +17,9 @@ export default function SavedDesignTable({ designs }) {
             <th>Design flow rate</th>
             <th>Target pH</th>
             <th>Last modified</th>
+            <th>
+              <span className="visually-hidden">Actions</span>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -50,6 +57,17 @@ export default function SavedDesignTable({ designs }) {
               </td>
               <td>{number(d.inputs.targetPH)}</td>
               <td className="muted">{date(d.updatedAt)}</td>
+              <td>
+                <button
+                  type="button"
+                  className="text-button small"
+                  aria-label={`Duplicate ${d.designName}`}
+                  disabled={duplicating !== null}
+                  onClick={() => onDuplicate(d)}
+                >
+                  {duplicating === d.id ? "Duplicating…" : "Duplicate"}
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>

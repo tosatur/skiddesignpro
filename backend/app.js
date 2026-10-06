@@ -6,13 +6,12 @@ import { designRoutes } from "./routes/designRoutes.js";
 import { designToolsRoutes } from "./routes/designToolsRoutes.js";
 import { priceRoutes } from "./routes/priceRoutes.js";
 import { PriceLibrary } from "./db/PriceLibrary.js";
+import { AppSettings } from "./db/AppSettings.js";
+import { settingsRoutes } from "./routes/settingsRoutes.js";
 
 export function createApp(
   store,
-  {
-    testToolsEnabled = process.env.SPN_ENABLE_TEST_TOOLS === "true",
-    prices = new PriceLibrary(":memory:"),
-  } = {},
+  { prices = new PriceLibrary(":memory:"), settings = new AppSettings() } = {},
 ) {
   const app = express();
   app.disable("x-powered-by");
@@ -48,12 +47,13 @@ export function createApp(
       inputLimits,
       heights: designConfig.layout.heights,
       containerHeight: designConfig.layout.containerHeight,
-      testToolsEnabled,
+      devMode: settings.get().devMode,
     });
   });
-  app.use("/api/designs", designRoutes(store, { testToolsEnabled, prices }));
-  app.use("/api/design-tools", designToolsRoutes(prices));
+  app.use("/api/designs", designRoutes(store, { prices, settings }));
+  app.use("/api/design-tools", designToolsRoutes(prices, settings));
   app.use("/api/prices", priceRoutes(prices));
+  app.use("/api/settings", settingsRoutes(settings));
   app.use("/api", (_req, res) =>
     res.status(404).json({ error: "API endpoint not found." }),
   );

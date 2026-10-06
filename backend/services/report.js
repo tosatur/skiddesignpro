@@ -42,7 +42,6 @@ export function buildReport(design, display = designDisplay(design)) {
   const parameters = g.profile.parameters.filter(
     (p) => p.value && !["tn", "totalNitrogen"].includes(p.key),
   );
-  const tagged = display.equipment.items.some((e) => e.tags?.length);
   const typedIO = g.ioList.some((io) => io.type);
   const costBasis = g.cost.lines.some((line) => line.basis);
   const basisLabel = (line) => {
@@ -130,26 +129,15 @@ export function buildReport(design, display = designDisplay(design)) {
       {
         title: "Proposed Equipment",
         tables: [
-          tagged
-            ? table(
-                ["Equipment", "Tags", "Quantity", "Size / Details"],
-                display.equipment.items.map((e) => [
-                  e.name,
-                  e.tags?.join(", ") || "-",
-                  e.quantity ?? unavailable,
-                  e.details,
-                ]),
-                [0.27, 0.3, 0.11, 0.32],
-              )
-            : table(
-                ["Equipment", "Quantity", "Size / Details"],
-                display.equipment.items.map((e) => [
-                  e.name,
-                  e.quantity ?? unavailable,
-                  e.details,
-                ]),
-                [0.45, 0.18, 0.37],
-              ),
+          table(
+            ["Equipment", "Quantity", "Size / Details"],
+            display.equipment.items.map((e) => [
+              e.name,
+              e.quantity ?? unavailable,
+              e.details,
+            ]),
+            [0.45, 0.18, 0.37],
+          ),
         ],
         notes: g.equipment.sizing
           ? [g.equipment.sizing.tank, g.equipment.sizing.pump]
@@ -186,15 +174,20 @@ export function buildReport(design, display = designDisplay(design)) {
                   ]
                 : []),
               ["Control method", display.dosing.control],
+              ...(g.dosing.note
+                ? [["Equipment selection", g.dosing.note]]
+                : []),
               ...(g.dosing.trains?.length
                 ? [
                     [
                       "Control strategy",
-                      "pH probes feed the dosing controller, which trims the caustic or acid dose rate in proportion to the deviation from the target pH, tapering as the target is approached.",
+                      g.dosing.feedbackEnabled === false
+                        ? g.dosing.control
+                        : "pH probes feed the dosing controller, which trims the caustic or acid dose rate in proportion to the deviation from the target pH, tapering as the target is approached.",
                     ],
                     [
                       "Chemical demand",
-                      "Not calculated: wastewater composition and buffering vary, so the dose is set in real time by the controller. Confirm reagent consumption by titration and commissioning.",
+                      "Not calculated: wastewater composition and buffering vary. Confirm reagent consumption by titration and commissioning.",
                     ],
                     [
                       "Dosing pump capacity",

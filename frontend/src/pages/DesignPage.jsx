@@ -7,6 +7,7 @@ import DosingPanel from "../components/DosingPanel.jsx";
 import TradeWastePanel from "../components/TradeWastePanel.jsx";
 import CostPanel from "../components/CostPanel.jsx";
 import QuotePanel from "../components/QuotePanel.jsx";
+import EquipmentSettingsStatus from "../components/EquipmentSettingsStatus.jsx";
 
 export default function DesignPage() {
   const { id } = useParams();
@@ -42,7 +43,9 @@ export default function DesignPage() {
       <DesignSummaryPanel design={design} />
       <div className="details-grid">
         <div className="panel-stack">
-          <EquipmentPanel equipment={design.display.equipment} />
+          <EquipmentPanel equipment={design.display.equipment}>
+            <EquipmentSettingsStatus design={design} onUpdated={reload} />
+          </EquipmentPanel>
         </div>
         <div className="panel-stack">
           <DosingPanel dosing={design.display.dosing} />

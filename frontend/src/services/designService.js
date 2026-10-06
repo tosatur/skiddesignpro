@@ -41,6 +41,19 @@ const view = (design) =>
 
 export const designService = {
   config: () => request("/config"),
+  setDevMode: (devMode) =>
+    request("/settings/dev-mode", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ devMode }),
+    }),
+  equipmentSettings: () => request("/settings/equipment"),
+  setEquipmentSettings: (changes) =>
+    request("/settings/equipment", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(changes),
+    }),
   prices: () => request("/prices"),
   setPrice: (key, price) =>
     request(`/prices/${encodeURIComponent(key)}`, {
@@ -69,7 +82,9 @@ export const designService = {
     const design = await compute(inputs);
     const saved = await window.spn.saveDesignAs(design, design.designName);
     if (!saved)
-      throw new Error("No file was saved. Try again and choose a save location.");
+      throw new Error(
+        "No file was saved. Try again and choose a save location.",
+      );
     return rememberDocument(saved.path, design);
   },
   import: (inputs) =>
@@ -86,6 +101,38 @@ export const designService = {
     return { deleted: true };
   },
   deleteAll: () => request("/designs", { method: "DELETE" }),
+  updateEquipment: async (id, revision, equipmentEnabled) => {
+    if (!isDesktop())
+      return request(`/designs/${id}/equipment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ revision, equipmentEnabled }),
+      });
+    const { path, design: previous } = getDocument(id);
+    const design = await request("/design-tools/equipment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ design: previous, revision, equipmentEnabled }),
+    });
+    await window.spn.saveDesign(design, path);
+    return rememberDocument(path, design);
+  },
+  updateQuotes: async (id, priceOverrides, revision) => {
+    if (!isDesktop())
+      return request(`/designs/${id}/quotes`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ priceOverrides, revision }),
+      });
+    const { path, design: previous } = getDocument(id);
+    const design = await request("/design-tools/quotes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ design: previous, priceOverrides, revision }),
+    });
+    await window.spn.saveDesign(design, path);
+    return rememberDocument(path, design);
+  },
   update: async (id, inputs, revision) => {
     if (!isDesktop())
       return request(`/designs/${id}`, {

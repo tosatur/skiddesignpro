@@ -22,6 +22,7 @@ export default function DosingPanel({ dosing }) {
           <dd>{dosing.control}</dd>
         </div>
       </dl>
+      {dosing.note && <p className="muted small">{dosing.note}</p>}
     </section>
   );
 }

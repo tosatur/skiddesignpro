@@ -1,6 +1,12 @@
 import { date } from "../services/format.js";
 
-export default function RecentDesignsTable({ files, onOpen, onRemove }) {
+export default function RecentDesignsTable({
+  files,
+  onOpen,
+  onRemove,
+  onDuplicate,
+  duplicating,
+}) {
   return (
     <div className="table-scroll">
       <table className="saved-table">
@@ -10,7 +16,9 @@ export default function RecentDesignsTable({ files, onOpen, onRemove }) {
             <th>Client / Facility</th>
             <th>Last modified</th>
             <th>Location</th>
-            <th></th>
+            <th>
+              <span className="visually-hidden">Actions</span>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -39,14 +47,25 @@ export default function RecentDesignsTable({ files, onOpen, onRemove }) {
               <td className="muted">{date(file.updatedAt)}</td>
               <td className="muted small">{file.path}</td>
               <td>
-                <button
-                  type="button"
-                  className="text-button small"
-                  aria-label={`Remove ${file.designName} from Recent files`}
-                  onClick={() => onRemove(file)}
-                >
-                  Remove
-                </button>
+                <div className="home-design-actions">
+                  <button
+                    type="button"
+                    className="text-button small"
+                    aria-label={`Duplicate ${file.designName}`}
+                    disabled={duplicating !== null}
+                    onClick={() => onDuplicate(file)}
+                  >
+                    {duplicating === file.path ? "Duplicating…" : "Duplicate"}
+                  </button>
+                  <button
+                    type="button"
+                    className="text-button small"
+                    aria-label={`Remove ${file.designName} from Recent files`}
+                    onClick={() => onRemove(file)}
+                  >
+                    Remove
+                  </button>
+                </div>
               </td>
             </tr>
           ))}

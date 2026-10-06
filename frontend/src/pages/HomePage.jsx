@@ -6,25 +6,24 @@ import { designService } from "../services/designService.js";
 import { isDesktop, rememberDocument } from "../services/desktopDocuments.js";
 import TestTools from "../components/TestTools.jsx";
 
-export default function HomePage() {
+export default function HomePage({ devMode }) {
   const desktop = isDesktop();
   const navigate = useNavigate();
   const [designs, setDesigns] = useState(null);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [attempt, setAttempt] = useState(0);
-  const [testToolsEnabled, setTestToolsEnabled] = useState(false);
   const [openError, setOpenError] = useState("");
+  const [duplicating, setDuplicating] = useState(null);
 
   useEffect(() => {
     let active = true;
     const list = desktop ? window.spn.recentDesigns() : designService.list();
-    Promise.all([list, designService.config()])
-      .then(([d, config]) => {
+    list
+      .then((d) => {
         if (active) {
           setDesigns(d);
           setError("");
-          setTestToolsEnabled(config.testToolsEnabled);
         }
       })
       .catch((e) => active && setError(e.message));
@@ -68,6 +67,29 @@ export default function HomePage() {
     setAttempt((value) => value + 1);
   }
 
+  async function duplicateDesign(entry) {
+    setOpenError("");
+    setDuplicating(entry.path ?? entry.id);
+    try {
+      const design = desktop
+        ? (await window.spn.openRecentDesign(entry.path)).design
+        : await designService.get(entry.id, "settings");
+      navigate("/designs/new", {
+        state: {
+          duplicateInputs: {
+            ...structuredClone(design.inputs),
+            designName: "",
+            clientName: "",
+          },
+        },
+      });
+    } catch (e) {
+      setOpenError(e.message);
+    } finally {
+      setDuplicating(null);
+    }
+  }
+
   return (
     <>
       <div className="page-heading">
@@ -83,7 +105,7 @@ export default function HomePage() {
               Open…
             </button>
           )}
-          {testToolsEnabled && (
+          {devMode && (
             <TestTools
               hasDesigns={Boolean(designs?.length)}
               onImported={() => {
@@ -147,9 +169,15 @@ export default function HomePage() {
               files={designs}
               onOpen={openFile}
               onRemove={removeFile}
+              onDuplicate={duplicateDesign}
+              duplicating={duplicating}
             />
           ) : filtered.length ? (
-            <SavedDesignTable designs={filtered} />
+            <SavedDesignTable
+              designs={filtered}
+              onDuplicate={duplicateDesign}
+              duplicating={duplicating}
+            />
           ) : (
             <div className="empty-state">
               <p>No designs match “{search}”.</p>
