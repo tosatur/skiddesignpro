@@ -76,3 +76,20 @@ export function withOutputs(design, priceBook) {
     throw error;
   }
 }
+
+// Quote edits retain the design's selected equipment and geometry. Applying
+// current equipment settings is a separate, explicit action on the design page.
+export function withUpdatedPrices(design, priceOverrides, priceBook) {
+  const inputs = validateInputs({ ...design.inputs, priceOverrides });
+  const generated = withOutputs(design, priceBook).generated;
+  return {
+    ...design,
+    inputs,
+    revision: design.revision + 1,
+    updatedAt: new Date().toISOString(),
+    generated: {
+      ...generated,
+      cost: estimateCost(generated.equipment, priceBook, inputs.priceOverrides),
+    },
+  };
+}

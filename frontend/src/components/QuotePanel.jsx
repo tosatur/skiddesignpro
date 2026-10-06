@@ -91,11 +91,7 @@ export default function QuotePanel({ design, onChanged }) {
     setBusy(true);
     setMessage("");
     try {
-      await designService.update(
-        design.id,
-        { ...design.inputs, priceOverrides: next },
-        design.revision,
-      );
+      await designService.updateQuotes(design.id, next, design.revision);
     } catch (error) {
       if (error.status === 409) {
         setMessage(

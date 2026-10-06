@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { Design, withOutputs } from "../models/Design.js";
+import { Design, withOutputs, withUpdatedPrices } from "../models/Design.js";
 import { buildReport } from "../services/report.js";
 import { buildReportText } from "../services/reportText.js";
 import { generateReportPDF } from "../services/reportPdf.js";
@@ -124,6 +124,38 @@ export function designRoutes(store, { prices, settings } = {}) {
       display,
       report: buildReport(design, display),
     });
+  });
+  router.post("/:id/equipment", (req, res) => {
+    if (req.body?.revision !== req.design.revision)
+      return res
+        .status(409)
+        .json({
+          error:
+            "This design has changed. Reopen it before updating equipment.",
+        });
+    res.json(
+      store.update(
+        new Design(req.design.inputs, req.design, {
+          priceBook: priceBook(),
+          equipmentEnabled: equipmentEnabled(),
+        }),
+        req.design.revision,
+      ),
+    );
+  });
+  router.put("/:id/quotes", (req, res) => {
+    if (req.body?.revision !== req.design.revision)
+      return res
+        .status(409)
+        .json({
+          error: "This design has changed. Reopen it before editing quotes.",
+        });
+    res.json(
+      store.update(
+        withUpdatedPrices(req.design, req.body.priceOverrides, priceBook()),
+        req.design.revision,
+      ),
+    );
   });
   router.put("/:id", (req, res) => {
     if (req.body?.revision !== req.design.revision)

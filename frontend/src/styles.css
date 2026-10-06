@@ -741,6 +741,64 @@ dd {
   color: var(--color-text-muted);
   font-size: 13px;
 }
+.equipment-sync {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  margin-bottom: 18px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-alt);
+}
+.equipment-sync:focus {
+  outline: none;
+}
+.equipment-sync.current {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.equipment-sync-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  flex: 1 1 230px;
+}
+.equipment-sync-mark {
+  color: var(--color-accent);
+  font-size: 17px;
+  line-height: 1.2;
+}
+.equipment-sync.current .equipment-sync-mark {
+  color: var(--color-status-ok-text);
+}
+.equipment-sync-label {
+  font-size: 12px;
+  font-weight: 600;
+}
+.equipment-sync-content p + p {
+  margin-top: 4px;
+}
+.equipment-update-button {
+  min-height: 30px;
+  padding: 5px 10px;
+  font-size: 12px;
+}
+.equipment-sync-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  color: var(--color-danger);
+  font-size: 12px;
+}
+.equipment-sync-message {
+  width: 100%;
+}
 .visually-hidden {
   position: absolute;
   width: 1px;

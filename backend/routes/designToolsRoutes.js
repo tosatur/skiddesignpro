@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { Design, withOutputs } from "../models/Design.js";
+import { Design, withOutputs, withUpdatedPrices } from "../models/Design.js";
 import { buildReport } from "../services/report.js";
 import { generateReportPDF } from "../services/reportPdf.js";
 import { designDisplay } from "../services/designDisplay.js";
@@ -26,6 +26,32 @@ export function designToolsRoutes(prices, settings) {
     const design = withOutputs(req.body, priceBook());
     const display = designDisplay(design);
     res.json({ ...design, display, report: buildReport(design, display) });
+  });
+  router.post("/equipment", (req, res) => {
+    const design = req.body?.design;
+    if (!design || req.body?.revision !== design.revision)
+      return res
+        .status(409)
+        .json({
+          error:
+            "This design has changed. Reopen it before updating equipment.",
+        });
+    res.json(
+      new Design(design.inputs, design, {
+        priceBook: priceBook(),
+        equipmentEnabled: settings?.get().equipmentEnabled,
+      }),
+    );
+  });
+  router.post("/quotes", (req, res) => {
+    const design = req.body?.design;
+    if (!design || req.body?.revision !== design.revision)
+      return res
+        .status(409)
+        .json({
+          error: "This design has changed. Reopen it before editing quotes.",
+        });
+    res.json(withUpdatedPrices(design, req.body.priceOverrides, priceBook()));
   });
 
   router.post("/report.pdf", async (req, res) => {

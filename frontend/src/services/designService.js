@@ -101,6 +101,38 @@ export const designService = {
     return { deleted: true };
   },
   deleteAll: () => request("/designs", { method: "DELETE" }),
+  updateEquipment: async (id, revision) => {
+    if (!isDesktop())
+      return request(`/designs/${id}/equipment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ revision }),
+      });
+    const { path, design: previous } = getDocument(id);
+    const design = await request("/design-tools/equipment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ design: previous, revision }),
+    });
+    await window.spn.saveDesign(design, path);
+    return rememberDocument(path, design);
+  },
+  updateQuotes: async (id, priceOverrides, revision) => {
+    if (!isDesktop())
+      return request(`/designs/${id}/quotes`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ priceOverrides, revision }),
+      });
+    const { path, design: previous } = getDocument(id);
+    const design = await request("/design-tools/quotes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ design: previous, priceOverrides, revision }),
+    });
+    await window.spn.saveDesign(design, path);
+    return rememberDocument(path, design);
+  },
   update: async (id, inputs, revision) => {
     if (!isDesktop())
       return request(`/designs/${id}`, {
