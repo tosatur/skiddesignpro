@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { designService } from "../services/designService.js";
 import { money } from "../services/format.js";
 
@@ -14,7 +14,7 @@ function QuoteForm({ line, currency, busy, onSave, onCancel }) {
   const [toLibrary, setToLibrary] = useState(false);
   return (
     <form
-      className="quote-form"
+      className="quote-form design-quote-form"
       onKeyDown={(event) => {
         if (event.key === "Escape") onCancel();
       }}
@@ -124,9 +124,13 @@ export default function QuotePanel({ design, onChanged }) {
   }
 
   return (
-    <section className="card quote-panel" ref={panel}>
+    <section
+      className="card design-table-card quote-panel"
+      ref={panel}
+      aria-labelledby="cost-breakdown-title"
+    >
       <div className="quote-heading">
-        <h2>Cost breakdown</h2>
+        <h2 id="cost-breakdown-title">Cost breakdown</h2>
         {cost.complete && cost.quotedShare != null && (
           <span className="muted small">
             {Math.round(cost.quotedShare * 100)}% quoted · ±
@@ -139,130 +143,150 @@ export default function QuotePanel({ design, onChanged }) {
           {message}
         </div>
       )}
-      <div className="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Component</th>
-              <th>Qty</th>
-              <th className="num">Unit cost</th>
-              <th className="num">Amount</th>
-              <th>Basis</th>
-              <th>
-                <span className="visually-hidden">Actions</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {cost.lines.map((line) => (
-              <tr key={line.id}>
-                <td>{line.name}</td>
-                <td>{line.quantity ?? "-"}</td>
-                <td className="num">
-                  {line.unitCost == null
-                    ? "-"
-                    : money(line.unitCost, cost.currency)}
-                </td>
-                <td className="num">
-                  {line.amount == null
-                    ? "-"
-                    : money(line.amount, cost.currency)}
-                </td>
-                <td>
-                  <span
-                    className={`status ${line.basis && line.basis !== "estimate" ? "within" : "unknown"}`}
-                  >
-                    {basisLabels[line.basis] ?? "Estimate"}
-                  </span>
-                  {line.quoteRef && (
-                    <span className="muted small quote-ref">
-                      {line.quoteRef}
-                    </span>
-                  )}
-                </td>
-                <td className="quote-cell">
-                  {editing === line.id ? (
-                    <QuoteForm
-                      line={line}
-                      currency={cost.currency}
-                      busy={busy}
-                      onCancel={() => close(line.id)}
-                      onSave={({ unitCost, quoteRef, toLibrary }) =>
-                        saveOverrides(
-                          line.id,
-                          { ...overrides, [line.id]: { unitCost, quoteRef } },
-                          toLibrary && line.priceKey
-                            ? { key: line.priceKey, unitCost, quoteRef }
-                            : null,
-                        )
-                      }
-                    />
-                  ) : (
-                    <div className="quote-actions">
-                      {line.quantity != null && (
-                        <button
-                          type="button"
-                          className="button subtle"
-                          disabled={busy}
-                          aria-label={`Enter quote for ${line.name}`}
-                          data-quote-line={line.id}
-                          onClick={() => setEditing(line.id)}
-                        >
-                          Enter quote
-                        </button>
-                      )}
-                      {overrides[line.id] && (
-                        <button
-                          type="button"
-                          className="button subtle"
-                          disabled={busy}
-                          aria-label={`Remove quote for ${line.name}`}
-                          onClick={() => {
-                            const { [line.id]: _removed, ...rest } = overrides;
-                            saveOverrides(line.id, rest, null);
-                          }}
-                        >
-                          Remove quote
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-          {cost.complete && (
-            <tfoot>
+      {cost.lines.length === 0 ? (
+        <p className="panel-empty-state">No equipment costs for this design.</p>
+      ) : (
+        <div className="table-scroll design-table-scroll">
+          <table className="cost-table">
+            <thead>
               <tr>
-                <th scope="row" colSpan={3}>
-                  Subtotal
+                <th scope="col">Component</th>
+                <th scope="col" className="quantity">
+                  Qty
                 </th>
-                <td className="num">{money(cost.subtotal, cost.currency)}</td>
-                <td colSpan={2} />
+                <th scope="col" className="num">
+                  Unit cost
+                </th>
+                <th scope="col" className="num">
+                  Amount
+                </th>
+                <th scope="col">Basis</th>
+                <th scope="col">
+                  <span className="visually-hidden">Actions</span>
+                </th>
               </tr>
-              {cost.quoted > 0 && (
-                <tr>
-                  <th scope="row" colSpan={3}>
-                    Quoted portion
-                  </th>
-                  <td className="num">{money(cost.quoted, cost.currency)}</td>
-                  <td colSpan={2} />
-                </tr>
+            </thead>
+            <tbody>
+              {cost.lines.map((line) => (
+                <Fragment key={line.id}>
+                  <tr>
+                    <td>{line.name}</td>
+                    <td className="quantity">{line.quantity ?? "—"}</td>
+                    <td className="num">
+                      {line.unitCost == null
+                        ? "-"
+                        : money(line.unitCost, cost.currency)}
+                    </td>
+                    <td className="num cost-amount">
+                      {line.amount == null
+                        ? "-"
+                        : money(line.amount, cost.currency)}
+                    </td>
+                    <td>
+                      <span
+                        className={`status ${line.basis && line.basis !== "estimate" ? "within" : "unknown"}`}
+                      >
+                        {basisLabels[line.basis] ?? "Estimate"}
+                      </span>
+                      {line.quoteRef && (
+                        <span className="muted small quote-ref">
+                          {line.quoteRef}
+                        </span>
+                      )}
+                    </td>
+                    <td className="quote-cell">
+                      <div className="quote-actions">
+                        {line.quantity != null && (
+                          <button
+                            type="button"
+                            className="button subtle"
+                            disabled={busy}
+                            aria-label={`Enter quote for ${line.name}`}
+                            data-quote-line={line.id}
+                            aria-expanded={editing === line.id}
+                            aria-controls={`quote-editor-${line.id}`}
+                            onClick={() => setEditing(line.id)}
+                          >
+                            Enter quote
+                          </button>
+                        )}
+                        {overrides[line.id] && (
+                          <button
+                            type="button"
+                            className="button subtle"
+                            disabled={busy}
+                            aria-label={`Remove quote for ${line.name}`}
+                            onClick={() => {
+                              const { [line.id]: _removed, ...rest } =
+                                overrides;
+                              saveOverrides(line.id, rest, null);
+                            }}
+                          >
+                            Remove quote
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                  {editing === line.id && (
+                    <tr
+                      className="quote-editor-row"
+                      id={`quote-editor-${line.id}`}
+                    >
+                      <td colSpan={6}>
+                        <QuoteForm
+                          line={line}
+                          currency={cost.currency}
+                          busy={busy}
+                          onCancel={() => close(line.id)}
+                          onSave={({ unitCost, quoteRef, toLibrary }) =>
+                            saveOverrides(
+                              line.id,
+                              {
+                                ...overrides,
+                                [line.id]: { unitCost, quoteRef },
+                              },
+                              toLibrary && line.priceKey
+                                ? { key: line.priceKey, unitCost, quoteRef }
+                                : null,
+                            )
+                          }
+                        />
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {cost.complete && cost.lines.length > 0 && (
+        <dl className="cost-totals" aria-label="Cost totals">
+          <div>
+            <dt>Subtotal</dt>
+            <dd>
+              {money(
+                cost.subtotal ??
+                  cost.lines.reduce((sum, line) => sum + line.amount, 0),
+                cost.currency,
               )}
-              <tr>
-                <th scope="row" colSpan={3}>
-                  Estimated range
-                </th>
-                <td className="num nowrap">
-                  {money(cost.low, cost.currency)}–
-                  {money(cost.high, cost.currency)}
-                </td>
-                <td colSpan={2} />
-              </tr>
-            </tfoot>
+            </dd>
+          </div>
+          {cost.quoted > 0 && (
+            <div>
+              <dt>Quoted portion</dt>
+              <dd>{money(cost.quoted, cost.currency)}</dd>
+            </div>
           )}
-        </table>
-      </div>
+          <div>
+            <dt>Estimated range</dt>
+            <dd>
+              {money(cost.low, cost.currency)}–{money(cost.high, cost.currency)}
+            </dd>
+          </div>
+        </dl>
+      )}
     </section>
   );
 }
