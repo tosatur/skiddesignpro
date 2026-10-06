@@ -14,6 +14,7 @@ export default function HomePage({ devMode }) {
   const [search, setSearch] = useState("");
   const [attempt, setAttempt] = useState(0);
   const [openError, setOpenError] = useState("");
+  const [duplicating, setDuplicating] = useState(null);
 
   useEffect(() => {
     let active = true;
@@ -64,6 +65,29 @@ export default function HomePage({ devMode }) {
   async function removeFile(file) {
     await window.spn.removeRecentDesign(file.path);
     setAttempt((value) => value + 1);
+  }
+
+  async function duplicateDesign(entry) {
+    setOpenError("");
+    setDuplicating(entry.path ?? entry.id);
+    try {
+      const design = desktop
+        ? (await window.spn.openRecentDesign(entry.path)).design
+        : await designService.get(entry.id, "settings");
+      navigate("/designs/new", {
+        state: {
+          duplicateInputs: {
+            ...structuredClone(design.inputs),
+            designName: "",
+            clientName: "",
+          },
+        },
+      });
+    } catch (e) {
+      setOpenError(e.message);
+    } finally {
+      setDuplicating(null);
+    }
   }
 
   return (
@@ -145,9 +169,15 @@ export default function HomePage({ devMode }) {
               files={designs}
               onOpen={openFile}
               onRemove={removeFile}
+              onDuplicate={duplicateDesign}
+              duplicating={duplicating}
             />
           ) : filtered.length ? (
-            <SavedDesignTable designs={filtered} />
+            <SavedDesignTable
+              designs={filtered}
+              onDuplicate={duplicateDesign}
+              duplicating={duplicating}
+            />
           ) : (
             <div className="empty-state">
               <p>No designs match “{search}”.</p>

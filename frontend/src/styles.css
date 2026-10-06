@@ -510,6 +510,13 @@ tbody tr:last-child td {
   font-weight: 600;
   color: var(--color-text);
 }
+.home-design-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  white-space: nowrap;
+}
 .muted {
   color: var(--color-text-muted);
 }
@@ -888,9 +895,16 @@ dd {
   }
 }
 @media (max-width: 520px) {
-  .header-dev-mode .dev-mode-label { display: none; }
-  .header-nav { gap: 12px; }
-  .header-dev-mode { margin-left: 12px; padding-left: 12px; }
+  .header-dev-mode .dev-mode-label {
+    display: none;
+  }
+  .header-nav {
+    gap: 12px;
+  }
+  .header-dev-mode {
+    margin-left: 12px;
+    padding-left: 12px;
+  }
 }
 .visually-hidden {
   position: absolute;
