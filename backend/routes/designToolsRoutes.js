@@ -9,7 +9,7 @@ import { designDisplay } from "../services/designDisplay.js";
 // authoritative copy of a design and decides where it lives on disk, so
 // these compute from a posted design instead of a stored one and never
 // write anything themselves.
-export function designToolsRoutes(prices) {
+export function designToolsRoutes(prices, settings) {
   const router = Router();
   const priceBook = () => prices?.book();
 
@@ -17,6 +17,7 @@ export function designToolsRoutes(prices) {
     res.json(
       new Design(req.body?.inputs, req.body?.previous ?? null, {
         priceBook: priceBook(),
+        equipmentEnabled: settings?.get().equipmentEnabled,
       }),
     );
   });

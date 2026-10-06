@@ -1,8 +1,10 @@
 import { designConfig } from "../config/designConfig.js";
 import { assignTags } from "./tagging.js";
 import { coolingDuty } from "./processCalcs.js";
+import { normalizeEquipmentEnabled } from "../config/equipmentOptions.js";
 
-export function selectChemical(inputs) {
+export function selectChemical(inputs, equipmentEnabled) {
+  const enabled = normalizeEquipmentEnabled(equipmentEnabled);
   const direction = Math.sign(inputs.targetPH - inputs.inletPH);
   const id =
     direction > 0
@@ -11,8 +13,10 @@ export function selectChemical(inputs) {
         ? inputs.acidId
         : null;
   const trains = [
-    designConfig.chemicals.find((c) => c.type === "caustic"),
-    designConfig.chemicals.find((c) => c.id === inputs.acidId),
+    enabled.causticDosingPump &&
+      designConfig.chemicals.find((c) => c.type === "caustic"),
+    enabled.acidDosingPump &&
+      designConfig.chemicals.find((c) => c.id === inputs.acidId),
   ].filter(Boolean);
   return {
     correction:
@@ -20,42 +24,68 @@ export function selectChemical(inputs) {
     chemical: designConfig.chemicals.find((c) => c.id === id) ?? null,
     trains,
     capacityLH: null,
-    control: trains.length
-      ? "Continuous pH feedback (PID)"
-      : direction === 0
-        ? "pH monitoring"
-        : "pH feedback",
+    control: !trains.length
+      ? "Dosing disabled"
+      : !enabled.dosingController
+        ? "External dosing control required"
+        : !enabled.tank || !enabled.phProbe
+          ? "pH feedback unavailable: pH measurement not selected"
+          : "Continuous pH feedback (PID)",
+    feedbackEnabled: Boolean(
+      trains.length &&
+      enabled.dosingController &&
+      enabled.tank &&
+      enabled.phProbe,
+    ),
+    note:
+      direction > 0 && !enabled.causticDosingPump
+        ? "Caustic dosing is disabled; the equipment needed to raise pH is not included."
+        : direction < 0 && !enabled.acidDosingPump
+          ? "Acid dosing is disabled; the equipment needed to lower pH is not included."
+          : null,
   };
 }
 
-export function selectEquipment(inputs, dosing) {
-  const band = designConfig.tanks.flowBands.find(
-    (b) => inputs.flowRate <= b.maxFlowKLH,
-  );
+export function selectEquipment(inputs, dosing, equipmentEnabled) {
+  const enabled = normalizeEquipmentEnabled(equipmentEnabled);
+  const band =
+    enabled.tank &&
+    designConfig.tanks.flowBands.find((b) => inputs.flowRate <= b.maxFlowKLH);
   const sizeKL =
     band &&
     designConfig.tanks.standardSizesKL.find((size) => size >= band.sizeKL);
-  const tank = { count: sizeKL ? band.count : null, sizeKL: sizeKL ?? null };
+  const tank = {
+    count: enabled.tank ? (sizeKL ? band.count : null) : 0,
+    sizeKL: sizeKL || null,
+  };
+  const pumpsEnabled = enabled.feedPump || enabled.dischargePump;
   const requiredPumpFlow =
     inputs.flowRate * (1 + designConfig.pumps.designMargin);
   const pump = {
-    flowKLH:
-      designConfig.pumps.ratingsKLH.find((q) => q >= requiredPumpFlow) ?? null,
+    flowKLH: pumpsEnabled
+      ? (designConfig.pumps.ratingsKLH.find((q) => q >= requiredPumpFlow) ??
+        null)
+      : null,
     headM: null,
   };
   // Save the actual basis alongside the selection so later config changes cannot
   // silently change the explanation of an existing design.
   const sizing = {
-    tank: sizeKL
-      ? `Tank sizing basis (preliminary design assumption): flow band up to ${band.maxFlowKLH} kL/h selects ${tank.count} × ${tank.sizeKL} kL. Nominal residence time = ${tank.count * tank.sizeKL} kL / ${inputs.flowRate} kL/h × 60 = ${Number(((tank.count * tank.sizeKL * 60) / inputs.flowRate).toFixed(2))} minutes total. This is not an SPN-required residence time.`
-      : "Tank sizing: design flow is outside the configured preliminary selection bands; detailed engineering required.",
-    pump: `Feed and discharge pump basis: ${inputs.flowRate} kL/h + ${Number((designConfig.pumps.designMargin * 100).toFixed(2))}% configured preliminary allowance = ${Number(requiredPumpFlow.toFixed(2))} kL/h required. ${pump.flowKLH ? `Next configured nominal capacity at or above this flow: ${pump.flowKLH} kL/h each.` : "No configured nominal capacity covers this flow; detailed engineering required."}`,
+    tank: !enabled.tank
+      ? "Balancing tanks are disabled; tank sizing is excluded."
+      : sizeKL
+        ? `Tank sizing basis (preliminary design assumption): flow band up to ${band.maxFlowKLH} kL/h selects ${tank.count} × ${tank.sizeKL} kL. Nominal residence time = ${tank.count * tank.sizeKL} kL / ${inputs.flowRate} kL/h × 60 = ${Number(((tank.count * tank.sizeKL * 60) / inputs.flowRate).toFixed(2))} minutes total. This is not an SPN-required residence time.`
+        : "Tank sizing: design flow is outside the configured preliminary selection bands; detailed engineering required.",
+    pump: !pumpsEnabled
+      ? "Feed and discharge pumps are disabled; pump sizing is excluded."
+      : `${enabled.feedPump && enabled.dischargePump ? "Feed and discharge pump" : enabled.feedPump ? "Feed pump" : "Discharge pump"} basis: ${inputs.flowRate} kL/h + ${Number((designConfig.pumps.designMargin * 100).toFixed(2))}% configured preliminary allowance = ${Number(requiredPumpFlow.toFixed(2))} kL/h required. ${pump.flowKLH ? `Next configured nominal capacity at or above this flow: ${pump.flowKLH} kL/h each.` : "No configured nominal capacity covers this flow; detailed engineering required."}`,
   };
   const quantities = designConfig.equipment;
   const perTank = (count) => (tank.count === null ? null : tank.count * count);
   const items = [];
   const add = (id, name, quantity, rating, signal) => {
-    if (quantity !== 0) items.push({ id, name, quantity, rating, signal });
+    if (enabled[id] && quantity !== 0)
+      items.push({ id, name, quantity, rating, signal });
   };
   add(
     "tank",
@@ -133,7 +163,9 @@ export function selectEquipment(inputs, dosing) {
     quantities.skidControllers,
     null,
   );
-  const trains = quantities.causticDosingPumps + quantities.acidDosingPumps;
+  const trains =
+    (enabled.causticDosingPump ? quantities.causticDosingPumps : 0) +
+    (enabled.acidDosingPump ? quantities.acidDosingPumps : 0);
   add(
     "manualValve",
     "Manual isolation valve",
@@ -168,10 +200,10 @@ export function selectEquipment(inputs, dosing) {
   add(
     "recirculation",
     "Recirculation line",
-    quantities.recirculationLines,
+    enabled.tank ? quantities.recirculationLines : 0,
     null,
   );
-  const cooling = coolingDuty(inputs);
+  const cooling = enabled.coolingHx ? coolingDuty(inputs) : null;
   if (cooling)
     add(
       "coolingHx",
@@ -238,8 +270,8 @@ export function generateIOList(equipment) {
   const controllerTag = (id) =>
     equipment.items.find((item) => item.id === id)?.tags?.[0] ?? null;
   const controllers = {
-    dosing: controllerTag("dosingController") ?? "Dosing controller",
-    skid: controllerTag("skidController") ?? "Skid controller",
+    dosing: controllerTag("dosingController") ?? "Not assigned",
+    skid: controllerTag("skidController") ?? "Not assigned",
   };
   return equipment.items.flatMap((item) => {
     const signals = designConfig.ioSignals[item.id];

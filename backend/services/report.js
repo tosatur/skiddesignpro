@@ -174,15 +174,20 @@ export function buildReport(design, display = designDisplay(design)) {
                   ]
                 : []),
               ["Control method", display.dosing.control],
+              ...(g.dosing.note
+                ? [["Equipment selection", g.dosing.note]]
+                : []),
               ...(g.dosing.trains?.length
                 ? [
                     [
                       "Control strategy",
-                      "pH probes feed the dosing controller, which trims the caustic or acid dose rate in proportion to the deviation from the target pH, tapering as the target is approached.",
+                      g.dosing.feedbackEnabled === false
+                        ? g.dosing.control
+                        : "pH probes feed the dosing controller, which trims the caustic or acid dose rate in proportion to the deviation from the target pH, tapering as the target is approached.",
                     ],
                     [
                       "Chemical demand",
-                      "Not calculated: wastewater composition and buffering vary, so the dose is set in real time by the controller. Confirm reagent consumption by titration and commissioning.",
+                      "Not calculated: wastewater composition and buffering vary. Confirm reagent consumption by titration and commissioning.",
                     ],
                     [
                       "Dosing pump capacity",

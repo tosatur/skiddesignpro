@@ -85,14 +85,15 @@ export function estimateCost(
     lines.push(
       line(
         "levelInstrumentation",
-        "Level instrumentation (LT, low/high switches)",
+        "Level instrumentation (per tank package)",
         equipment.tank.count,
       ),
     );
-  lines.push(
-    line("fabrication", "Skid frame / fabrication", 1),
-    line("pipingValvesAssembly", "Piping, valves and assembly", 1),
-  );
+  if (equipment.items.length)
+    lines.push(
+      line("fabrication", "Skid frame / fabrication", 1),
+      line("pipingValvesAssembly", "Piping, valves and assembly", 1),
+    );
   const complete = lines.every((l) => l.amount !== null);
   const sum = (filter) =>
     lines.filter(filter).reduce((total, l) => total + (l.amount ?? 0), 0);

@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { createApp } from "../backend/app.js";
 import { DesignStore } from "../backend/db/DesignStore.js";
 import { PriceLibrary } from "../backend/db/PriceLibrary.js";
+import { AppSettings } from "../backend/db/AppSettings.js";
 import { atomicWriteFile } from "../backend/util/atomicWrite.js";
 import { desktopDatabasePath } from "./databasePath.js";
 import { listRecent, removeRecent, touchRecent } from "./recentFiles.js";
@@ -69,6 +70,7 @@ async function startDesktop() {
   server = createApp(store, {
     testToolsEnabled,
     prices: new PriceLibrary(databasePath),
+    settings: new AppSettings(databasePath),
   }).listen(0, "127.0.0.1");
   await once(server, "listening");
   const origin = `http://127.0.0.1:${server.address().port}`;

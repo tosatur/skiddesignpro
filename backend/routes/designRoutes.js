@@ -6,9 +6,13 @@ import { generateReportPDF } from "../services/reportPdf.js";
 import { designDisplay } from "../services/designDisplay.js";
 import { exactSulphurTotal } from "../../shared/measurements.js";
 
-export function designRoutes(store, { testToolsEnabled = false, prices } = {}) {
+export function designRoutes(
+  store,
+  { testToolsEnabled = false, prices, settings } = {},
+) {
   const router = Router();
   const priceBook = () => prices?.book();
+  const equipmentEnabled = () => settings?.get().equipmentEnabled;
   router.get("/", (_req, res) =>
     res.json(
       store.list().map(({ id, designName, clientName, inputs, updatedAt }) => ({
@@ -25,7 +29,10 @@ export function designRoutes(store, { testToolsEnabled = false, prices } = {}) {
       .status(201)
       .json(
         store.create(
-          new Design(req.body?.inputs, null, { priceBook: priceBook() }),
+          new Design(req.body?.inputs, null, {
+            priceBook: priceBook(),
+            equipmentEnabled: equipmentEnabled(),
+          }),
         ),
       ),
   );
@@ -53,7 +60,10 @@ export function designRoutes(store, { testToolsEnabled = false, prices } = {}) {
             ? inputs.designName.trim()
             : `Entry ${index + 1}`;
         try {
-          const design = new Design(inputs, null, { inputsOnly: true });
+          const design = new Design(inputs, null, {
+            inputsOnly: true,
+            equipmentEnabled: equipmentEnabled(),
+          });
           const name = design.designName.toLowerCase();
           if (names.has(name)) {
             summary.skipped.push({
@@ -125,6 +135,7 @@ export function designRoutes(store, { testToolsEnabled = false, prices } = {}) {
         new Design(req.body.inputs, req.design, {
           inputsOnly: !req.design.generated,
           priceBook: priceBook(),
+          equipmentEnabled: equipmentEnabled(),
         }),
         req.design.revision,
       ),

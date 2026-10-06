@@ -11,11 +11,12 @@ import { checkTradeWaste } from "../services/complianceCheck.js";
 import { generateLayout } from "../services/layout.js";
 import { estimateCost } from "../services/costing.js";
 import { processCalculations } from "../services/processCalcs.js";
+import { normalizeEquipmentEnabled } from "../config/equipmentOptions.js";
 
-export function generateOutputs(inputs, priceBook) {
+export function generateOutputs(inputs, priceBook, equipmentEnabled) {
   const profile = new WastewaterProfile(inputs);
-  const dosing = selectChemical(inputs);
-  const equipment = selectEquipment(inputs, dosing);
+  const dosing = selectChemical(inputs, equipmentEnabled);
+  const equipment = selectEquipment(inputs, dosing, equipmentEnabled);
   return {
     profile,
     equipment,
@@ -33,7 +34,7 @@ export class Design {
   constructor(
     rawInputs,
     previous = null,
-    { inputsOnly = false, priceBook } = {},
+    { inputsOnly = false, priceBook, equipmentEnabled } = {},
   ) {
     const inputs = validateInputs(rawInputs);
     const now = new Date().toISOString();
@@ -45,7 +46,13 @@ export class Design {
     this.updatedAt = now;
     this.revision = (previous?.revision ?? 0) + 1;
     this.inputs = inputs;
-    if (!inputsOnly) this.generated = generateOutputs(inputs, priceBook);
+    this.equipmentEnabled = normalizeEquipmentEnabled(equipmentEnabled);
+    if (!inputsOnly)
+      this.generated = generateOutputs(
+        inputs,
+        priceBook,
+        this.equipmentEnabled,
+      );
   }
 }
 
@@ -57,7 +64,11 @@ export function withOutputs(design, priceBook) {
   try {
     return {
       ...design,
-      generated: generateOutputs(validateInputs(design.inputs), priceBook),
+      generated: generateOutputs(
+        validateInputs(design.inputs),
+        priceBook,
+        design.equipmentEnabled,
+      ),
     };
   } catch (error) {
     if (error.fields)
