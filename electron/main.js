@@ -52,12 +52,7 @@ function saveDesignAtPath(path, design) {
 }
 
 async function startDesktop() {
-  const testToolsEnabled =
-    process.env.SPN_ENABLE_TEST_TOOLS === "true" ||
-    process.argv.includes("--test-tools");
-  app.setAppUserModelId(
-    testToolsEnabled ? "com.spn.skiddesigner.dev" : "com.spn.skiddesigner",
-  );
+  app.setAppUserModelId("com.spn.skiddesigner");
   databasePath = desktopDatabasePath({
     appPath: app.getAppPath(),
     isPackaged: app.isPackaged,
@@ -68,7 +63,6 @@ async function startDesktop() {
   store = new DesignStore(databasePath);
   recentFilesPath = join(app.getPath("userData"), "recent-designs.json");
   server = createApp(store, {
-    testToolsEnabled,
     prices: new PriceLibrary(databasePath),
     settings: new AppSettings(databasePath),
   }).listen(0, "127.0.0.1");
@@ -80,9 +74,7 @@ async function startDesktop() {
     height: 1000,
     minWidth: 800,
     minHeight: 600,
-    title: testToolsEnabled
-      ? "SPN Skid Designer — Dev Mode"
-      : "SPN Skid Designer",
+    title: "SPN Skid Designer",
     backgroundColor: "#fafafa",
     show: false,
     webPreferences: {
@@ -92,10 +84,6 @@ async function startDesktop() {
       preload: fileURLToPath(new URL("./preload.cjs", import.meta.url)),
     },
   });
-  if (testToolsEnabled) {
-    // Keep the dev label visible when the web page supplies its own title.
-    window.on("page-title-updated", (event) => event.preventDefault());
-  }
   const session = window.webContents.session;
   session.setPermissionRequestHandler((_contents, _permission, callback) =>
     callback(false),

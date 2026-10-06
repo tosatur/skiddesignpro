@@ -41,6 +41,12 @@ const view = (design) =>
 
 export const designService = {
   config: () => request("/config"),
+  setDevMode: (devMode) =>
+    request("/settings/dev-mode", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ devMode }),
+    }),
   equipmentSettings: () => request("/settings/equipment"),
   setEquipmentSettings: (changes) =>
     request("/settings/equipment", {

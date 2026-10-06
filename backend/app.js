@@ -11,11 +11,7 @@ import { settingsRoutes } from "./routes/settingsRoutes.js";
 
 export function createApp(
   store,
-  {
-    testToolsEnabled = process.env.SPN_ENABLE_TEST_TOOLS === "true",
-    prices = new PriceLibrary(":memory:"),
-    settings = new AppSettings(),
-  } = {},
+  { prices = new PriceLibrary(":memory:"), settings = new AppSettings() } = {},
 ) {
   const app = express();
   app.disable("x-powered-by");
@@ -51,13 +47,10 @@ export function createApp(
       inputLimits,
       heights: designConfig.layout.heights,
       containerHeight: designConfig.layout.containerHeight,
-      testToolsEnabled,
+      devMode: settings.get().devMode,
     });
   });
-  app.use(
-    "/api/designs",
-    designRoutes(store, { testToolsEnabled, prices, settings }),
-  );
+  app.use("/api/designs", designRoutes(store, { prices, settings }));
   app.use("/api/design-tools", designToolsRoutes(prices, settings));
   app.use("/api/prices", priceRoutes(prices));
   app.use("/api/settings", settingsRoutes(settings));

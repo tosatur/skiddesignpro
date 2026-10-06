@@ -17,6 +17,7 @@ export class AppSettings {
         : {}
       : this.memory;
     return {
+      devMode: saved.devMode === true,
       equipmentEnabled: normalizeEquipmentEnabled(saved.equipmentEnabled),
     };
   }
@@ -27,6 +28,14 @@ export class AppSettings {
       ...saved.equipmentEnabled,
       ...changes,
     });
+    return this.#write(saved);
+  }
+
+  setDevMode(devMode) {
+    return this.#write({ ...this.get(), devMode });
+  }
+
+  #write(saved) {
     if (this.path) atomicWriteFile(this.path, JSON.stringify(saved, null, 2));
     else this.memory = saved;
     return saved;

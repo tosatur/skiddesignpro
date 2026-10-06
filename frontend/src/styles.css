@@ -189,6 +189,19 @@ p + p {
   margin-bottom: 18px;
   font-size: 14px;
 }
+.page-heading.home-heading {
+  flex-direction: row;
+  align-items: center;
+}
+.dev-mode-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
 .equipment-toolbar p {
   margin-top: 4px;
 }
@@ -261,6 +274,15 @@ p + p {
   }
 }
 @media (max-width: 480px) {
+  .home-heading {
+    gap: 10px;
+  }
+  .dev-mode-control {
+    gap: 4px;
+  }
+  .dev-mode-control .toggle-status {
+    display: none;
+  }
   .brand-title {
     display: none;
   }

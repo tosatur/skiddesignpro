@@ -6,13 +6,17 @@ import { generateReportPDF } from "../services/reportPdf.js";
 import { designDisplay } from "../services/designDisplay.js";
 import { exactSulphurTotal } from "../../shared/measurements.js";
 
-export function designRoutes(
-  store,
-  { testToolsEnabled = false, prices, settings } = {},
-) {
+export function designRoutes(store, { prices, settings } = {}) {
   const router = Router();
   const priceBook = () => prices?.book();
   const equipmentEnabled = () => settings?.get().equipmentEnabled;
+  const requireDevMode = (_req, res, next) => {
+    if (!settings?.get().devMode)
+      return res
+        .status(403)
+        .json({ error: "Enable Dev Mode on the home page to use this tool." });
+    next();
+  };
   router.get("/", (_req, res) =>
     res.json(
       store.list().map(({ id, designName, clientName, inputs, updatedAt }) => ({
@@ -25,89 +29,85 @@ export function designRoutes(
     ),
   );
   router.post("/", (req, res) =>
-    res
-      .status(201)
-      .json(
-        store.create(
-          new Design(req.body?.inputs, null, {
-            priceBook: priceBook(),
-            equipmentEnabled: equipmentEnabled(),
-          }),
-        ),
+    res.status(201).json(
+      store.create(
+        new Design(req.body?.inputs, null, {
+          priceBook: priceBook(),
+          equipmentEnabled: equipmentEnabled(),
+        }),
       ),
+    ),
   );
-  if (testToolsEnabled) {
-    router.delete("/", (_req, res) => {
-      res.json({ deleted: store.deleteAll() });
-    });
-    router.post("/import", (req, res) => {
-      if (!Array.isArray(req.body))
-        return res
-          .status(400)
-          .json({ error: "Supply a JSON array of design inputs." });
-      const names = new Set(
-        store.list().map((d) => d.designName.trim().toLowerCase()),
-      );
-      const summary = {
-        supplied: req.body.length,
-        imported: 0,
-        rejected: [],
-        skipped: [],
-      };
-      for (const [index, inputs] of req.body.entries()) {
-        const label =
-          typeof inputs?.designName === "string" && inputs.designName.trim()
-            ? inputs.designName.trim()
-            : `Entry ${index + 1}`;
-        try {
-          const design = new Design(inputs, null, {
-            inputsOnly: true,
-            equipmentEnabled: equipmentEnabled(),
-          });
-          const name = design.designName.toLowerCase();
-          if (names.has(name)) {
-            summary.skipped.push({
-              designName: label,
-              reason: "A design with this name already exists.",
-            });
-            continue;
-          }
-          if (exactSulphurTotal(design.inputs.customWastewaterData) !== null)
-            design.inputs.customWastewaterData.sulphur = "";
-          store.create(design);
-          names.add(name);
-          summary.imported++;
-        } catch (error) {
-          summary.rejected.push({
+  router.delete("/", requireDevMode, (_req, res) => {
+    res.json({ deleted: store.deleteAll() });
+  });
+  router.post("/import", requireDevMode, (req, res) => {
+    if (!Array.isArray(req.body))
+      return res
+        .status(400)
+        .json({ error: "Supply a JSON array of design inputs." });
+    const names = new Set(
+      store.list().map((d) => d.designName.trim().toLowerCase()),
+    );
+    const summary = {
+      supplied: req.body.length,
+      imported: 0,
+      rejected: [],
+      skipped: [],
+    };
+    for (const [index, inputs] of req.body.entries()) {
+      const label =
+        typeof inputs?.designName === "string" && inputs.designName.trim()
+          ? inputs.designName.trim()
+          : `Entry ${index + 1}`;
+      try {
+        const design = new Design(inputs, null, {
+          inputsOnly: true,
+          equipmentEnabled: equipmentEnabled(),
+        });
+        const name = design.designName.toLowerCase();
+        if (names.has(name)) {
+          summary.skipped.push({
             designName: label,
-            reason:
-              error.status === 400
-                ? Object.entries(error.fields)
-                    .map(([field, message]) => `${field}: ${message}`)
-                    .join("; ")
-                : "Could not save this design. Please try again.",
+            reason: "A design with this name already exists.",
           });
+          continue;
         }
+        if (exactSulphurTotal(design.inputs.customWastewaterData) !== null)
+          design.inputs.customWastewaterData.sulphur = "";
+        store.create(design);
+        names.add(name);
+        summary.imported++;
+      } catch (error) {
+        summary.rejected.push({
+          designName: label,
+          reason:
+            error.status === 400
+              ? Object.entries(error.fields)
+                  .map(([field, message]) => `${field}: ${message}`)
+                  .join("; ")
+              : "Could not save this design. Please try again.",
+        });
       }
-      res.json(summary);
-    });
-    router.get("/reports.txt", (_req, res) => {
-      const designs = store.list();
-      const text = designs.length
-        ? designs
-            .map((design) =>
-              buildReportText(buildReport(withOutputs(design, priceBook()))),
-            )
-            .join("\n\n")
-        : "No saved designs.\n";
-      res
-        .set({
-          "Content-Type": "text/plain; charset=utf-8",
-          "Content-Disposition": 'attachment; filename="SPN-all-reports.txt"',
-        })
-        .send(text);
-    });
-  }
+    }
+    res.json(summary);
+  });
+  router.get("/reports.txt", requireDevMode, (_req, res) => {
+    const designs = store.list();
+    const text = designs.length
+      ? designs
+          .map((design) =>
+            buildReportText(buildReport(withOutputs(design, priceBook()))),
+          )
+          .join("\n\n")
+      : "No saved designs.\n";
+    res
+      .set({
+        "Content-Type": "text/plain; charset=utf-8",
+        "Content-Disposition": 'attachment; filename="SPN-all-reports.txt"',
+      })
+      .send(text);
+  });
   router.param("id", (req, res, next, id) => {
     req.design = store.get(id);
     if (!req.design)
