@@ -13,18 +13,14 @@ echo Installing the locked dependencies...
 call npm.cmd ci
 if errorlevel 1 goto failed
 
-echo Building the normal EXE...
+echo Building SPN Skid Designer...
 call npm.cmd run build:exe
 if errorlevel 1 goto failed
 
-echo Building the dev-mode EXE...
-call npm.cmd run build:exe:dev
-if errorlevel 1 goto failed
-
 echo.
-echo Both EXEs are ready.
-echo Normal EXE folder: "%~dp0release"
-echo Dev EXE folder:    "%~dp0release\dev"
+echo The EXE is ready.
+echo EXE folder: "%~dp0release"
+echo Use the Dev Mode switch on the home page to enable developer tools.
 if /i not "%~1"=="--no-pause" pause
 exit /b 0
 
