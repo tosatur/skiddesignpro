@@ -11,6 +11,7 @@ export default function ToggleSwitch({
       className="toggle-switch"
       role="switch"
       aria-label={label}
+      title={label}
       aria-checked={checked}
       aria-describedby={describedBy}
       aria-disabled={disabled}

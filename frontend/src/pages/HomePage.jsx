@@ -5,29 +5,24 @@ import RecentDesignsTable from "../components/RecentDesignsTable.jsx";
 import { designService } from "../services/designService.js";
 import { isDesktop, rememberDocument } from "../services/desktopDocuments.js";
 import TestTools from "../components/TestTools.jsx";
-import ToggleSwitch from "../components/ToggleSwitch.jsx";
 
-export default function HomePage() {
+export default function HomePage({ devMode }) {
   const desktop = isDesktop();
   const navigate = useNavigate();
   const [designs, setDesigns] = useState(null);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [attempt, setAttempt] = useState(0);
-  const [devMode, setDevMode] = useState(null);
-  const [devModeBusy, setDevModeBusy] = useState(false);
-  const [devModeError, setDevModeError] = useState("");
   const [openError, setOpenError] = useState("");
 
   useEffect(() => {
     let active = true;
     const list = desktop ? window.spn.recentDesigns() : designService.list();
-    Promise.all([list, designService.config()])
-      .then(([d, config]) => {
+    list
+      .then((d) => {
         if (active) {
           setDesigns(d);
           setError("");
-          setDevMode(config.devMode);
         }
       })
       .catch((e) => active && setError(e.message));
@@ -41,19 +36,6 @@ export default function HomePage() {
       .toLowerCase()
       .includes(search.toLowerCase()),
   );
-
-  async function toggleDevMode(enabled) {
-    setDevModeBusy(true);
-    setDevModeError("");
-    try {
-      const updated = await designService.setDevMode(enabled);
-      setDevMode(updated.devMode);
-    } catch (e) {
-      setDevModeError(e.message);
-    } finally {
-      setDevModeBusy(false);
-    }
-  }
 
   async function openFile(file) {
     setOpenError("");
@@ -86,23 +68,9 @@ export default function HomePage() {
 
   return (
     <>
-      <div className="page-heading home-heading">
+      <div className="page-heading">
         <h1>Your designs</h1>
-        <div className="dev-mode-control">
-          <span>Dev Mode</span>
-          <ToggleSwitch
-            label="Dev Mode"
-            checked={Boolean(devMode)}
-            disabled={devMode === null || devModeBusy}
-            onChange={toggleDevMode}
-          />
-        </div>
       </div>
-      {devModeError && (
-        <div className="notice error" role="alert">
-          {devModeError}
-        </div>
-      )}
       <div className="card designs-card">
         <div className="design-tools">
           <Link className="button primary" to="/designs/new">

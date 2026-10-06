@@ -94,7 +94,7 @@ p + p {
   border-bottom: 1px solid var(--color-border-subtle);
 }
 .header-inner {
-  max-width: 1220px;
+  max-width: none;
   margin: auto;
   height: 100%;
   padding: 0 40px;
@@ -189,15 +189,13 @@ p + p {
   margin-bottom: 18px;
   font-size: 14px;
 }
-.page-heading.home-heading {
-  flex-direction: row;
-  align-items: center;
-}
-.dev-mode-control {
+.header-dev-mode {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-left: auto;
+  margin-left: 28px;
+  padding-left: 24px;
+  border-left: 1px solid var(--color-border-subtle);
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
@@ -274,15 +272,6 @@ p + p {
   }
 }
 @media (max-width: 480px) {
-  .home-heading {
-    gap: 10px;
-  }
-  .dev-mode-control {
-    gap: 4px;
-  }
-  .dev-mode-control .toggle-status {
-    display: none;
-  }
   .brand-title {
     display: none;
   }
@@ -816,7 +805,13 @@ dd {
 .design-equipment-dialog::backdrop {
   background: #17233466;
 }
+.design-equipment-dialog > form {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 90px);
+}
 .design-equipment-dialog-heading {
+  flex-shrink: 0;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -833,6 +828,9 @@ dd {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: start;
   gap: 16px;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 .design-equipment-group {
   min-width: 0;
@@ -856,6 +854,7 @@ dd {
   font-weight: 600;
 }
 .design-equipment-dialog-footer {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -865,6 +864,17 @@ dd {
   border-top: 1px solid var(--color-border-subtle);
 }
 @media (max-width: 760px) {
+  .header-dev-mode {
+    margin-left: 16px;
+    padding-left: 16px;
+    gap: 8px;
+  }
+  .header-dev-mode .toggle-status {
+    display: none;
+  }
+  .brand-title {
+    display: none;
+  }
   .design-equipment-dialog {
     padding: 18px;
   }
@@ -876,6 +886,11 @@ dd {
     flex-wrap: wrap;
     gap: 12px;
   }
+}
+@media (max-width: 520px) {
+  .header-dev-mode .dev-mode-label { display: none; }
+  .header-nav { gap: 12px; }
+  .header-dev-mode { margin-left: 12px; padding-left: 12px; }
 }
 .visually-hidden {
   position: absolute;
