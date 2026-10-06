@@ -14,6 +14,7 @@ import DesignPage from "./pages/DesignPage.jsx";
 import LayoutPage from "./pages/LayoutPage.jsx";
 import ReportPage from "./pages/ReportPage.jsx";
 import PricesPage from "./pages/PricesPage.jsx";
+import EquipmentPage from "./pages/EquipmentPage.jsx";
 
 function Shell() {
   const location = useLocation();
@@ -40,6 +41,7 @@ function Shell() {
           </Link>
           <nav className="header-nav" aria-label="Main">
             <NavLink to="/prices">Price library</NavLink>
+            <NavLink to="/equipment">Equipment</NavLink>
           </nav>
         </div>
       </header>
@@ -52,6 +54,7 @@ function Shell() {
           <Route path="/designs/:id/layout" element={<LayoutPage />} />
           <Route path="/designs/:id/report" element={<ReportPage />} />
           <Route path="/prices" element={<PricesPage />} />
+          <Route path="/equipment" element={<EquipmentPage />} />
           <Route
             path="*"
             element={

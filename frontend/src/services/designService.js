@@ -41,6 +41,13 @@ const view = (design) =>
 
 export const designService = {
   config: () => request("/config"),
+  equipmentSettings: () => request("/settings/equipment"),
+  setEquipmentSettings: (changes) =>
+    request("/settings/equipment", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(changes),
+    }),
   prices: () => request("/prices"),
   setPrice: (key, price) =>
     request(`/prices/${encodeURIComponent(key)}`, {
@@ -69,7 +76,9 @@ export const designService = {
     const design = await compute(inputs);
     const saved = await window.spn.saveDesignAs(design, design.designName);
     if (!saved)
-      throw new Error("No file was saved. Try again and choose a save location.");
+      throw new Error(
+        "No file was saved. Try again and choose a save location.",
+      );
     return rememberDocument(saved.path, design);
   },
   import: (inputs) =>
