@@ -5,6 +5,7 @@ import { buildReportText } from "../services/reportText.js";
 import { generateReportPDF } from "../services/reportPdf.js";
 import { designDisplay } from "../services/designDisplay.js";
 import { exactSulphurTotal } from "../../shared/measurements.js";
+import { equipmentSelectionForDesign } from "../services/equipmentSettings.js";
 
 export function designRoutes(store, { prices, settings } = {}) {
   const router = Router();
@@ -127,17 +128,18 @@ export function designRoutes(store, { prices, settings } = {}) {
   });
   router.post("/:id/equipment", (req, res) => {
     if (req.body?.revision !== req.design.revision)
-      return res
-        .status(409)
-        .json({
-          error:
-            "This design has changed. Reopen it before updating equipment.",
-        });
+      return res.status(409).json({
+        error: "This design has changed. Reopen it before updating equipment.",
+      });
     res.json(
       store.update(
         new Design(req.design.inputs, req.design, {
           priceBook: priceBook(),
-          equipmentEnabled: equipmentEnabled(),
+          ...equipmentSelectionForDesign(
+            req.design,
+            equipmentEnabled(),
+            req.body.equipmentEnabled,
+          ),
         }),
         req.design.revision,
       ),
@@ -145,11 +147,9 @@ export function designRoutes(store, { prices, settings } = {}) {
   });
   router.put("/:id/quotes", (req, res) => {
     if (req.body?.revision !== req.design.revision)
-      return res
-        .status(409)
-        .json({
-          error: "This design has changed. Reopen it before editing quotes.",
-        });
+      return res.status(409).json({
+        error: "This design has changed. Reopen it before editing quotes.",
+      });
     res.json(
       store.update(
         withUpdatedPrices(req.design, req.body.priceOverrides, priceBook()),
@@ -167,7 +167,12 @@ export function designRoutes(store, { prices, settings } = {}) {
         new Design(req.body.inputs, req.design, {
           inputsOnly: !req.design.generated,
           priceBook: priceBook(),
-          equipmentEnabled: equipmentEnabled(),
+          equipmentEnabled:
+            req.design.equipmentSource === "custom"
+              ? req.design.equipmentEnabled
+              : equipmentEnabled(),
+          equipmentSource:
+            req.design.equipmentSource === "custom" ? "custom" : "settings",
         }),
         req.design.revision,
       ),

@@ -34,7 +34,12 @@ export class Design {
   constructor(
     rawInputs,
     previous = null,
-    { inputsOnly = false, priceBook, equipmentEnabled } = {},
+    {
+      inputsOnly = false,
+      priceBook,
+      equipmentEnabled,
+      equipmentSource = "settings",
+    } = {},
   ) {
     const inputs = validateInputs(rawInputs);
     const now = new Date().toISOString();
@@ -47,6 +52,7 @@ export class Design {
     this.revision = (previous?.revision ?? 0) + 1;
     this.inputs = inputs;
     this.equipmentEnabled = normalizeEquipmentEnabled(equipmentEnabled);
+    this.equipmentSource = equipmentSource;
     if (!inputsOnly)
       this.generated = generateOutputs(
         inputs,

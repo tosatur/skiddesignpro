@@ -1,12 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { equipmentOptions } from "../config/equipmentOptions.js";
-
-const equipmentSchema = z.strictObject(
-  Object.fromEntries(
-    equipmentOptions.map(({ id }) => [id, z.boolean().optional()]),
-  ),
-);
+import { equipmentSchema } from "../services/equipmentSettings.js";
 
 export function settingsRoutes(settings) {
   const router = Router();

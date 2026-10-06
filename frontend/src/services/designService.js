@@ -101,18 +101,18 @@ export const designService = {
     return { deleted: true };
   },
   deleteAll: () => request("/designs", { method: "DELETE" }),
-  updateEquipment: async (id, revision) => {
+  updateEquipment: async (id, revision, equipmentEnabled) => {
     if (!isDesktop())
       return request(`/designs/${id}/equipment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ revision }),
+        body: JSON.stringify({ revision, equipmentEnabled }),
       });
     const { path, design: previous } = getDocument(id);
     const design = await request("/design-tools/equipment", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ design: previous, revision }),
+      body: JSON.stringify({ design: previous, revision, equipmentEnabled }),
     });
     await window.spn.saveDesign(design, path);
     return rememberDocument(path, design);
