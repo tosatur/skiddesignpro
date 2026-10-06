@@ -109,10 +109,7 @@ export default function EquipmentSettingsStatus({ design, onUpdated }) {
                 <p className="muted small">
                   {olderDesign
                     ? "This design uses an earlier equipment selection."
-                    : `${changes.length} equipment ${changes.length === 1 ? "choice differs" : "choices differ"} from the current settings.`}{" "}
-                  {design.equipmentSource === "custom"
-                    ? "Use current settings to return to the defaults."
-                    : "Update to recalculate this design."}
+                    : `${changes.length} equipment ${changes.length === 1 ? "choice differs" : "choices differ"} from the default settings.`}{" "}
                 </p>
               )}
             </div>
@@ -136,7 +133,7 @@ export default function EquipmentSettingsStatus({ design, onUpdated }) {
               onClick={() => update()}
               disabled={busy}
             >
-              {busy ? "Updating…" : "Use current settings"}
+              {busy ? "Updating…" : "Use default settings"}
             </button>
           )}
         </div>
