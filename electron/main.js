@@ -1,7 +1,7 @@
 import { app, BrowserWindow, dialog, ipcMain, Menu, shell } from "electron";
 import { once } from "node:events";
 import { readFileSync } from "node:fs";
-import { basename, join } from "node:path";
+import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createApp } from "../backend/app.js";
 import { DesignStore } from "../backend/db/DesignStore.js";
@@ -112,11 +112,15 @@ async function startDesktop() {
 
   const defaultDesignDir =
     databasePath !== ":memory:" ? databasePath : app.getPath("documents");
+  const lastDesignDir = () => {
+    const [latest] = listRecent(recentFilesPath);
+    return latest ? dirname(latest.path) : defaultDesignDir;
+  };
 
   ipcMain.handle("design:open", async () => {
     const result = await dialog.showOpenDialog(window, {
       title: "Open design",
-      defaultPath: defaultDesignDir,
+      defaultPath: lastDesignDir(),
       filters: DESIGN_FILE_FILTERS,
       properties: ["openFile"],
     });
@@ -133,7 +137,7 @@ async function startDesktop() {
     );
     const result = await dialog.showSaveDialog(window, {
       title: "Save design as",
-      defaultPath: join(defaultDesignDir, `${safeName}.spnd`),
+      defaultPath: join(lastDesignDir(), `${safeName}.spnd`),
       filters: DESIGN_FILE_FILTERS,
     });
     return result.canceled ? null : saveDesignAtPath(result.filePath, design);
