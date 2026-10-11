@@ -4,10 +4,10 @@ import { buildReport } from "../services/report.js";
 import { buildReportText } from "../services/reportText.js";
 import { generateReportPDF } from "../services/reportPdf.js";
 import { designDisplay } from "../services/designDisplay.js";
-import { exactSulphurTotal } from "../../shared/measurements.js";
+import { importDesigns } from "../services/importDesigns.js";
 import { equipmentSelectionForDesign } from "../services/equipmentSettings.js";
 
-export function designRoutes(store, { prices, settings } = {}) {
+export function designRoutes(store, { prices, settings, onImported } = {}) {
   const router = Router();
   const priceBook = () => prices?.book();
   const equipmentEnabled = () => settings?.get().equipmentEnabled;
@@ -39,59 +39,17 @@ export function designRoutes(store, { prices, settings } = {}) {
       ),
     ),
   );
-  router.delete("/", requireDevMode, (_req, res) => {
-    res.json({ deleted: store.deleteAll() });
-  });
   router.post("/import", requireDevMode, (req, res) => {
     if (!Array.isArray(req.body))
       return res
         .status(400)
         .json({ error: "Supply a JSON array of design inputs." });
-    const names = new Set(
-      store.list().map((d) => d.designName.trim().toLowerCase()),
+    res.json(
+      importDesigns(store, req.body, {
+        equipmentEnabled: equipmentEnabled(),
+        onImported,
+      }),
     );
-    const summary = {
-      supplied: req.body.length,
-      imported: 0,
-      rejected: [],
-      skipped: [],
-    };
-    for (const [index, inputs] of req.body.entries()) {
-      const label =
-        typeof inputs?.designName === "string" && inputs.designName.trim()
-          ? inputs.designName.trim()
-          : `Entry ${index + 1}`;
-      try {
-        const design = new Design(inputs, null, {
-          inputsOnly: true,
-          equipmentEnabled: equipmentEnabled(),
-        });
-        const name = design.designName.toLowerCase();
-        if (names.has(name)) {
-          summary.skipped.push({
-            designName: label,
-            reason: "A design with this name already exists.",
-          });
-          continue;
-        }
-        if (exactSulphurTotal(design.inputs.customWastewaterData) !== null)
-          design.inputs.customWastewaterData.sulphur = "";
-        store.create(design);
-        names.add(name);
-        summary.imported++;
-      } catch (error) {
-        summary.rejected.push({
-          designName: label,
-          reason:
-            error.status === 400
-              ? Object.entries(error.fields)
-                  .map(([field, message]) => `${field}: ${message}`)
-                  .join("; ")
-              : "Could not save this design. Please try again.",
-        });
-      }
-    }
-    res.json(summary);
   });
   router.get("/reports.txt", requireDevMode, (_req, res) => {
     const designs = store.list();
@@ -100,12 +58,13 @@ export function designRoutes(store, { prices, settings } = {}) {
           .map((design) =>
             buildReportText(buildReport(withOutputs(design, priceBook()))),
           )
-          .join("\n\n")
+          .join("\n----------------------------------------\n\n")
       : "No saved designs.\n";
     res
       .set({
         "Content-Type": "text/plain; charset=utf-8",
         "Content-Disposition": 'attachment; filename="SPN-all-reports.txt"',
+        "X-Design-Count": String(designs.length),
       })
       .send(text);
   });

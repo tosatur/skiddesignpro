@@ -82,11 +82,5 @@ export class DesignStore {
     return true;
   }
 
-  deleteAll() {
-    const designs = this.#readAll();
-    for (const design of designs) this.delete(design.id);
-    return designs.length;
-  }
-
   close() {}
 }

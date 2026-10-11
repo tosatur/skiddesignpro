@@ -14,7 +14,7 @@ Create and save wastewater skid designs, view 2D and 3D layouts, record supplier
 
 The installer contains the Windows x64 app and needs no Node.js on the computer running it. The build is unsigned, so Windows SmartScreen may warn about an unknown publisher; choose **More info → Run anyway**.
 
-Use the **Dev Mode** switch at the far right of the white header to enable or disable **Import test designs**, **Export All Reports as Text** and **Delete All Previous Designs** on the home page. The switch is available on every page. Dev Mode starts disabled and remembers your choice. Changes take effect immediately in both the desktop and web app. Bulk deletion still asks for confirmation and removes every design in the current data folder.
+Use the **Dev Mode** switch at the far right of the white header to enable **Import test designs** on the home page. Its dialog imports JSON inputs or exports all reports as one text file. Imports skip duplicate names, save valid designs in the configured data folder and add those files to desktop Recents (up to 15). Export covers saved designs in that folder and does not change designs or Recents. The switch is available on every page, starts disabled and remembers your choice. Changes take effect immediately in both the desktop and web app.
 
 To build from a terminal in this folder:
 

@@ -1,17 +1,26 @@
 import { isDesktop } from "./desktopDocuments.js";
 
-async function download(url, filename, options) {
+async function reportResponse(url, options) {
   const response = await fetch(url, options);
   if (!response.ok) {
     const body = await response.json();
     throw new Error(body.error || "Could not export the report.");
   }
-  const blobUrl = URL.createObjectURL(await response.blob());
+  return response;
+}
+
+function downloadBlob(blob, filename) {
+  const blobUrl = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = blobUrl;
   link.download = filename;
   link.click();
   setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+}
+
+async function download(url, filename, options) {
+  const response = await reportResponse(url, options);
+  downloadBlob(await response.blob(), filename);
 }
 
 const reportFilename = (design) =>
@@ -32,5 +41,14 @@ export const downloadReport = (design) =>
         reportFilename(design),
       );
 
-export const downloadAllReportsText = () =>
-  download("/api/designs/reports.txt", "SPN-all-reports.txt");
+export async function downloadAllReportsText() {
+  const response = await reportResponse("/api/designs/reports.txt");
+  const designCount = Number(response.headers.get("X-Design-Count"));
+  if (!designCount) throw new Error("No saved designs to export.");
+  if (isDesktop()) {
+    const outcome = await window.spn.saveReportsText(await response.text());
+    return { ...outcome, designCount };
+  }
+  downloadBlob(await response.blob(), "SPN-all-reports.txt");
+  return { status: "started", designCount };
+}

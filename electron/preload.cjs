@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld("spn", {
     ipcRenderer.invoke("design:save-as", design, suggestedName),
   recentDesigns: () => ipcRenderer.invoke("recent:list"),
   removeRecentDesign: (path) => ipcRenderer.invoke("recent:remove", path),
+  saveReportsText: (text) => ipcRenderer.invoke("reports:save-text", text),
   takeOpenRequest: () => ipcRenderer.invoke("design:take-open-request"),
   onOpenRequest: (callback) => {
     const listener = () => callback();

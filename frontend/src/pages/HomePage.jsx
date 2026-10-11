@@ -107,15 +107,8 @@ export default function HomePage({ devMode }) {
           )}
           {devMode && (
             <TestTools
-              hasDesigns={Boolean(designs?.length)}
               onImported={() => {
                 setSearch("");
-                setAttempt((value) => value + 1);
-              }}
-              onDeleted={() => {
-                setDesigns([]);
-                setSearch("");
-                setError("");
                 setAttempt((value) => value + 1);
               }}
             />
