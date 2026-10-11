@@ -1,10 +1,10 @@
-import { dirname, join, resolve } from "node:path";
+import { join, resolve } from "node:path";
 
 export function desktopDatabasePath({
   appPath,
   isPackaged,
-  executablePath,
   portableDirectory,
+  documentsPath,
   databaseOverride,
 }) {
   if (databaseOverride)
@@ -14,8 +14,10 @@ export function desktopDatabasePath({
 
   // A portable EXE extracts its runtime into a temporary directory. Use the
   // original EXE's directory so saved designs survive closing or updating it.
-  if (isPackaged)
-    return join(resolve(portableDirectory || dirname(executablePath)), "data");
+  if (isPackaged && portableDirectory)
+    return join(resolve(portableDirectory), "data");
+
+  if (isPackaged) return join(resolve(documentsPath), "SPN Skid Designer");
 
   return join(appPath, "backend", "db", "data");
 }
