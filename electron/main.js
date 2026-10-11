@@ -1,7 +1,7 @@
 import { app, BrowserWindow, dialog, ipcMain, Menu, shell } from "electron";
 import { once } from "node:events";
 import { readFileSync } from "node:fs";
-import { basename, dirname, join } from "node:path";
+import { basename, dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createApp } from "../backend/app.js";
 import { DesignStore } from "../backend/db/DesignStore.js";
@@ -18,6 +18,7 @@ let server;
 let store;
 let databasePath;
 let recentFilesPath;
+let openRequest = null;
 let closing = false;
 
 function recentEntry(path, design) {
@@ -51,6 +52,24 @@ function saveDesignAtPath(path, design) {
   return { path };
 }
 
+function designPathFromArgs(argv, workingDirectory) {
+  const arg = argv
+    .slice(1)
+    .find((value) => extname(value).toLowerCase() === ".spnd");
+  return arg ? resolve(workingDirectory, arg) : null;
+}
+
+function requestOpen(path) {
+  try {
+    openRequest = openDesignAtPath(path);
+  } catch (error) {
+    dialog.showErrorBox("Could not open design", error.message);
+    return;
+  }
+  if (window && !window.isDestroyed())
+    window.webContents.send("design:open-request");
+}
+
 async function startDesktop() {
   app.setAppUserModelId("com.spn.skiddesigner");
   databasePath = desktopDatabasePath({
@@ -62,6 +81,8 @@ async function startDesktop() {
   });
   store = new DesignStore(databasePath);
   recentFilesPath = join(app.getPath("userData"), "recent-designs.json");
+  const launchPath = designPathFromArgs(process.argv, process.cwd());
+  if (launchPath) requestOpen(launchPath);
   server = createApp(store, {
     prices: new PriceLibrary(databasePath),
     settings: new AppSettings(databasePath),
@@ -142,6 +163,11 @@ async function startDesktop() {
     });
     return result.canceled ? null : saveDesignAtPath(result.filePath, design);
   });
+  ipcMain.handle("design:take-open-request", () => {
+    const request = openRequest;
+    openRequest = null;
+    return request;
+  });
   ipcMain.handle("recent:list", () => listRecent(recentFilesPath));
   ipcMain.handle("recent:remove", (_event, path) => {
     removeRecent(recentFilesPath, path);
@@ -201,11 +227,13 @@ app.on("before-quit", (event) => {
 if (!app.requestSingleInstanceLock()) {
   app.quit();
 } else {
-  app.on("second-instance", () => {
+  app.on("second-instance", (_event, argv, workingDirectory) => {
     if (!window || window.isDestroyed()) return;
     if (window.isMinimized()) window.restore();
     window.show();
     window.focus();
+    const path = designPathFromArgs(argv, workingDirectory);
+    if (path) requestOpen(path);
   });
   app
     .whenReady()

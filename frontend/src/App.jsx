@@ -6,6 +6,7 @@ import {
   Link,
   NavLink,
   useLocation,
+  useNavigate,
 } from "react-router-dom";
 import HomePage from "./pages/HomePage.jsx";
 import NewDesignPage from "./pages/NewDesignPage.jsx";
@@ -17,9 +18,11 @@ import PricesPage from "./pages/PricesPage.jsx";
 import EquipmentPage from "./pages/EquipmentPage.jsx";
 import ToggleSwitch from "./components/ToggleSwitch.jsx";
 import { designService } from "./services/designService.js";
+import { isDesktop, rememberDocument } from "./services/desktopDocuments.js";
 
 function Shell() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [devMode, setDevMode] = useState(null);
   const [devModeBusy, setDevModeBusy] = useState(false);
   const [devModeError, setDevModeError] = useState("");
@@ -39,6 +42,18 @@ function Shell() {
       active = false;
     };
   }, [attempt]);
+
+  useEffect(() => {
+    if (!isDesktop()) return;
+    async function openRequested() {
+      const opened = await window.spn.takeOpenRequest();
+      if (!opened) return;
+      rememberDocument(opened.path, opened.design);
+      navigate(`/designs/${opened.design.id}`);
+    }
+    openRequested();
+    return window.spn.onOpenRequest(openRequested);
+  }, [navigate]);
 
   async function toggleDevMode(enabled) {
     setDevModeBusy(true);

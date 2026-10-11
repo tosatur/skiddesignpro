@@ -10,4 +10,10 @@ contextBridge.exposeInMainWorld("spn", {
     ipcRenderer.invoke("design:save-as", design, suggestedName),
   recentDesigns: () => ipcRenderer.invoke("recent:list"),
   removeRecentDesign: (path) => ipcRenderer.invoke("recent:remove", path),
+  takeOpenRequest: () => ipcRenderer.invoke("design:take-open-request"),
+  onOpenRequest: (callback) => {
+    const listener = () => callback();
+    ipcRenderer.on("design:open-request", listener);
+    return () => ipcRenderer.removeListener("design:open-request", listener);
+  },
 });
