@@ -241,7 +241,7 @@ if (!app.requestSingleInstanceLock()) {
     .catch((error) => {
       dialog.showErrorBox(
         "SkidDesignPro could not start",
-        `${error.message}\n\nData folder: ${databasePath || "not opened"}\n\nKeep the portable EXE and its data folder in a writable location, or set SPN_DATABASE to another folder.`,
+        `${error.message}\n\nData folder: ${databasePath || "not opened"}\n\nMake sure this folder is writable, or set SPN_DATABASE to another folder.`,
       );
       if (!server) store?.close();
       app.quit();

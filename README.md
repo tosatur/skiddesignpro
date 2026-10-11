@@ -42,7 +42,7 @@ Each design is its own `.spnd` file (plain JSON internally), named by its intern
 
 - **Web app:** `backend/db/data/` inside this project.
 - **Installed app:** `Documents\SkidDesignPro` by default. Uninstalling or updating the app leaves this folder in place.
-- **Portable EXE:** `data/` beside the EXE by default.
+- **Portable EXE:** `data/` beside the EXE by default. If that folder is read-only, for example inside Program Files or a zip file, it uses `Documents\SkidDesignPro` instead.
 
 For either desktop version, this is only the starting folder Open/Save dialogs suggest before you have opened or saved a design; after that they start in the folder you last used. Designs can be saved anywhere. **File → Open default save folder** shows the location.
 
