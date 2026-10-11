@@ -77,15 +77,8 @@ function Shell() {
       </a>
       <header className="app-header">
         <div className="header-inner">
-          <Link className="brand" to="/" aria-label="SPN Home">
-            <strong>
-              SPN<span>.</span>
-            </strong>
-            <span className="brand-title">
-              pH Correction
-              <br />
-              Skid Designer
-            </span>
+          <Link className="brand" to="/" aria-label="SkidDesignPro home">
+            <strong>SkidDesignPro</strong>
           </Link>
           <nav className="header-nav" aria-label="Main">
             <NavLink to="/prices">Price library</NavLink>

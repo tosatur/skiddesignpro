@@ -95,7 +95,7 @@ async function startDesktop() {
     height: 1000,
     minWidth: 800,
     minHeight: 600,
-    title: "SPN Skid Designer",
+    title: "SkidDesignPro",
     backgroundColor: "#fafafa",
     show: false,
     webPreferences: {
@@ -240,7 +240,7 @@ if (!app.requestSingleInstanceLock()) {
     .then(startDesktop)
     .catch((error) => {
       dialog.showErrorBox(
-        "SPN Skid Designer could not start",
+        "SkidDesignPro could not start",
         `${error.message}\n\nData folder: ${databasePath || "not opened"}\n\nKeep the portable EXE and its data folder in a writable location, or set SPN_DATABASE to another folder.`,
       );
       if (!server) store?.close();

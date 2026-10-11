@@ -29,7 +29,7 @@
   },
   "build": {
     "appId": "com.spn.skiddesigner",
-    "productName": "SPN Skid Designer",
+    "productName": "SkidDesignPro",
     "directories": {
       "output": "release"
     },
@@ -64,10 +64,10 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "deleteAppDataOnUninstall": false,
-      "artifactName": "SPN-Skid-Designer-${version}-setup.${ext}"
+      "artifactName": "SkidDesignPro-${version}-setup.${ext}"
     },
     "portable": {
-      "artifactName": "SPN-Skid-Designer-${version}-portable.${ext}"
+      "artifactName": "SkidDesignPro-${version}-portable.${ext}"
     }
   },
   "devDependencies": {

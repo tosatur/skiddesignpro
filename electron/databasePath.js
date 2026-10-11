@@ -17,7 +17,7 @@ export function desktopDatabasePath({
   if (isPackaged && portableDirectory)
     return join(resolve(portableDirectory), "data");
 
-  if (isPackaged) return join(resolve(documentsPath), "SPN Skid Designer");
+  if (isPackaged) return join(resolve(documentsPath), "SkidDesignPro");
 
   return join(appPath, "backend", "db", "data");
 }

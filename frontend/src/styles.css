@@ -114,9 +114,6 @@ p + p {
   font-size: 18px;
   letter-spacing: -0.6px;
 }
-.brand strong span {
-  color: var(--color-accent);
-}
 .header-nav {
   margin-left: auto;
   display: flex;
@@ -272,9 +269,6 @@ p + p {
   }
 }
 @media (max-width: 480px) {
-  .brand-title {
-    display: none;
-  }
   .equipment-option {
     padding: 14px;
     gap: 10px;
@@ -290,13 +284,6 @@ p + p {
     flex-direction: column;
     gap: 8px;
   }
-}
-.brand-title {
-  font-size: 11px;
-  font-weight: 550;
-  line-height: 1.3;
-  padding-left: 12px;
-  border-left: 1px solid var(--color-border-subtle);
 }
 main {
   max-width: 1220px;
@@ -877,9 +864,6 @@ dd {
     gap: 8px;
   }
   .header-dev-mode .toggle-status {
-    display: none;
-  }
-  .brand-title {
     display: none;
   }
   .design-equipment-dialog {

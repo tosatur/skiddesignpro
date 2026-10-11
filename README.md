@@ -1,4 +1,4 @@
-# SPN pH Correction Skid Designer
+# SkidDesignPro
 
 Create and save wastewater skid designs, view 2D and 3D layouts, record supplier quotes and export PDF reports. Run it in a browser or as a Windows desktop app, either installed or portable.
 
@@ -10,8 +10,8 @@ Create and save wastewater skid designs, view 2D and 3D layouts, record supplier
 
 | File | What it is |
 | --- | --- |
-| `release/SPN-Skid-Designer-1.0.0-setup.exe` | Installer. Installs for the current user without admin rights and adds Desktop and Start Menu shortcuts. Once installed, double-clicking a `.spnd` design file opens it in the app. Remove it from **Settings → Apps**. |
-| `release/SPN-Skid-Designer-1.0.0-portable.exe` | Portable app. Double-click to run; nothing is installed. Open designs with **Open…** or from **Recent files**. |
+| `release/SkidDesignPro-1.0.0-setup.exe` | Installer. Installs for the current user without admin rights and adds Desktop and Start Menu shortcuts. Once installed, double-clicking a `.spnd` design file opens it in the app. Remove it from **Settings → Apps**. |
+| `release/SkidDesignPro-1.0.0-portable.exe` | Portable app. Double-click to run; nothing is installed. Open designs with **Open…** or from **Recent files**. |
 
 Both are Windows x64 apps and need no Node.js on the computer running them. The builds are unsigned, so Windows SmartScreen may warn about an unknown publisher; choose **More info → Run anyway**.
 
@@ -41,7 +41,7 @@ npm start
 Each design is its own `.spnd` file (plain JSON internally), named by its internal ID.
 
 - **Web app:** `backend/db/data/` inside this project.
-- **Installed app:** `Documents\SPN Skid Designer` by default. Uninstalling or updating the app leaves this folder in place.
+- **Installed app:** `Documents\SkidDesignPro` by default. Uninstalling or updating the app leaves this folder in place.
 - **Portable EXE:** `data/` beside the EXE by default.
 
 For either desktop version, this is only the starting folder Open/Save dialogs suggest before you have opened or saved a design; after that they start in the folder you last used. Designs can be saved anywhere. **File → Open default save folder** shows the location.
@@ -56,7 +56,7 @@ To use a different data folder, set `SPN_DATABASE` before starting either app. F
 
 ```powershell
 $env:SPN_DATABASE = "D:\SPN Data\Designs"
-& ".\release\SPN-Skid-Designer-1.0.0-portable.exe"
+& ".\release\SkidDesignPro-1.0.0-portable.exe"
 ```
 
 ## Equipment settings
@@ -82,7 +82,7 @@ Costs start as budget estimates from `backend/config/designConfig.js` and carry 
 
 Quoted lines are fixed; the ±20% range applies only to the lines that are still estimates. Saved designs keep the prices they were generated with. Saving a quote updates costs without changing that design's equipment selection or layout.
 
-The library is stored as `prices.json` in the data folder described above (`backend/db/data` for the web app, `Documents\SPN Skid Designer` for the installed app, `data` beside the portable EXE, or `SPN_DATABASE` if set), so copy it whenever you copy that folder. Only prices you have changed are saved; everything else falls back to the config estimate. Deleting `prices.json` resets every price to its estimate.
+The library is stored as `prices.json` in the data folder described above (`backend/db/data` for the web app, `Documents\SkidDesignPro` for the installed app, `data` beside the portable EXE, or `SPN_DATABASE` if set), so copy it whenever you copy that folder. Only prices you have changed are saved; everything else falls back to the config estimate. Deleting `prices.json` resets every price to its estimate.
 
 ## Development
 
