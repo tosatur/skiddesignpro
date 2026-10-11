@@ -50,6 +50,13 @@
       ],
       "signAndEditExecutable": false
     },
+    "fileAssociations": [
+      {
+        "ext": "spnd",
+        "name": "SPN Design",
+        "description": "SPN skid design"
+      }
+    ],
     "nsis": {
       "oneClick": false,
       "perMachine": false,

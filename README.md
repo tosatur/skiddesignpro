@@ -10,8 +10,8 @@ Create and save wastewater skid designs, view 2D and 3D layouts, record supplier
 
 | File | What it is |
 | --- | --- |
-| `release/SPN-Skid-Designer-1.0.0-setup.exe` | Installer. Installs for the current user without admin rights and adds Desktop and Start Menu shortcuts. Remove it from **Settings → Apps**. |
-| `release/SPN-Skid-Designer-1.0.0-portable.exe` | Portable app. Double-click to run; nothing is installed. |
+| `release/SPN-Skid-Designer-1.0.0-setup.exe` | Installer. Installs for the current user without admin rights and adds Desktop and Start Menu shortcuts. Once installed, double-clicking a `.spnd` design file opens it in the app. Remove it from **Settings → Apps**. |
+| `release/SPN-Skid-Designer-1.0.0-portable.exe` | Portable app. Double-click to run; nothing is installed. Open designs with **Open…** or from **Recent files**. |
 
 Both are Windows x64 apps and need no Node.js on the computer running them. The builds are unsigned, so Windows SmartScreen may warn about an unknown publisher; choose **More info → Run anyway**.
 
