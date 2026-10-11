@@ -13,7 +13,7 @@
     "build": "vite build",
     "start": "node backend/index.js",
     "desktop": "npm run build && electron .",
-    "build:exe": "npm run build && electron-builder --win portable --x64 --publish never",
+    "build:exe": "npm run build && electron-builder --win --x64 --publish never",
     "test": "node --test tests/*.test.js",
     "test:e2e": "playwright test",
     "format": "prettier --write frontend/src backend tests *.js"
@@ -44,10 +44,24 @@
     "asar": true,
     "npmRebuild": false,
     "win": {
-      "target": "portable",
+      "target": [
+        "nsis",
+        "portable"
+      ],
       "signAndEditExecutable": false
     },
-    "artifactName": "SPN-Skid-Designer-${version}-portable.${ext}"
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "deleteAppDataOnUninstall": false,
+      "artifactName": "SPN-Skid-Designer-${version}-setup.${ext}"
+    },
+    "portable": {
+      "artifactName": "SPN-Skid-Designer-${version}-portable.${ext}"
+    }
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",

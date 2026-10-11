@@ -18,7 +18,7 @@ call npm.cmd run build:exe
 if errorlevel 1 goto failed
 
 echo.
-echo The EXE is ready.
+echo The installer and portable EXE are ready.
 echo EXE folder: "%~dp0release"
 echo Use the Dev Mode switch on the home page to enable developer tools.
 if /i not "%~1"=="--no-pause" pause
@@ -30,6 +30,6 @@ if /i not "%~1"=="--no-pause" pause
 exit /b 1
 
 :failed
-echo The EXE build failed. See the error above.
+echo The build failed. See the error above.
 if /i not "%~1"=="--no-pause" pause
 exit /b 1
