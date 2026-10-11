@@ -1,19 +1,18 @@
 # SkidDesignPro
 
-Create and save wastewater skid designs, view 2D and 3D layouts, record supplier quotes and export PDF reports. Run it in a browser or as a Windows desktop app, either installed or portable.
+Create and save wastewater skid designs, view 2D and 3D layouts, record supplier quotes and export PDF reports. Run it in a browser or as an installed Windows desktop app.
 
-## Build the Windows installer and EXE
+## Build the Windows installer
 
 1. Install **Node.js 24 or later**, including npm, on the Windows computer doing the build.
-2. Double-click **`build_exe.bat`** in this folder.
-3. Wait for **The installer and portable EXE are ready**. The script installs dependencies from `package-lock.json` and builds the app. Internet access is needed to download the build tools.
+2. Double-click **`build_installer.bat`** in this folder.
+3. Wait for **The installer is ready**. The script installs dependencies from `package-lock.json` and builds the app. Internet access is needed to download the build tools.
 
 | File | What it is |
 | --- | --- |
 | `release/SkidDesignPro-1.0.0-setup.exe` | Installer. Installs for the current user without admin rights and adds Desktop and Start Menu shortcuts. Once installed, double-clicking a `.spnd` design file opens it in the app. Remove it from **Settings → Apps**. |
-| `release/SkidDesignPro-1.0.0-portable.exe` | Portable app. Double-click to run; nothing is installed. Open designs with **Open…** or from **Recent files**. |
 
-Both are Windows x64 apps and need no Node.js on the computer running them. The builds are unsigned, so Windows SmartScreen may warn about an unknown publisher; choose **More info → Run anyway**.
+The installer contains the Windows x64 app and needs no Node.js on the computer running it. The build is unsigned, so Windows SmartScreen may warn about an unknown publisher; choose **More info → Run anyway**.
 
 Use the **Dev Mode** switch at the far right of the white header to enable or disable **Import test designs**, **Export All Reports as Text** and **Delete All Previous Designs** on the home page. The switch is available on every page. Dev Mode starts disabled and remembers your choice. Changes take effect immediately in both the desktop and web app. Bulk deletion still asks for confirmation and removes every design in the current data folder.
 
@@ -21,14 +20,12 @@ To build from a terminal in this folder:
 
 ```sh
 npm ci
-npm run build:exe
+npm run build:installer
 ```
 
 ## Run the web app instead
 
-Install Node.js 24 or later, then double-click **`run_web.cmd`**. This single launcher installs dependencies if needed, builds the frontend and starts the local server. Open **http://127.0.0.1:3001** in your browser and keep the terminal open. Press **Ctrl+C** to stop it. Use the header's **Dev Mode** switch whenever you need the dev tools; no separate launcher or restart is required.
-
-The manual equivalent is:
+Install Node.js 24 or later, then run these commands in this folder:
 
 ```sh
 npm ci
@@ -36,19 +33,20 @@ npm run build
 npm start
 ```
 
+Open **http://127.0.0.1:3001** in your browser and keep the terminal open. Press **Ctrl+C** to stop it. Use the header's **Dev Mode** switch whenever you need the dev tools.
+
 ## Where designs are saved
 
 Each design is its own `.spnd` file (plain JSON internally), named by its internal ID.
 
 - **Web app:** `backend/db/data/` inside this project.
 - **Installed app:** `Documents\SkidDesignPro` by default. Uninstalling or updating the app leaves this folder in place.
-- **Portable EXE:** `data/` beside the EXE by default. If that folder is read-only, for example inside Program Files or a zip file, it uses `Documents\SkidDesignPro` instead.
 
-For either desktop version, this is only the starting folder Open/Save dialogs suggest before you have opened or saved a design; after that they start in the folder you last used. Designs can be saved anywhere. **File → Open default save folder** shows the location.
+For the desktop app, this is only the starting folder Open/Save dialogs suggest before you have opened or saved a design; after that they start in the folder you last used. Designs can be saved anywhere. **File → Open default save folder** shows the location.
 
-Normal use and Dev Mode share the same data folder. Changing the switch does not move, copy or delete designs. Existing data from an older dev EXE stays in its original folder; use `SPN_DATABASE` to continue using that folder with the unified app.
+Normal use and Dev Mode share the same data folder. Changing the switch does not move, copy or delete designs. Existing data from an older build stays in its original folder, including `Documents\SPN Skid Designer`; use `SPN_DATABASE` to continue using that folder.
 
-Saved designs are not bundled into the EXEs. To use your web designs in the desktop app, close every app using that data, then copy the contents of `backend/db/data` into the desktop data folder above. Close the app before copying or moving data. For the portable EXE, keep the `data` folder when updating the EXE.
+Saved designs are not bundled into the installer. To use your web designs in the desktop app, close every app using that data, then copy the contents of `backend/db/data` into the desktop data folder above. Close the app before copying or moving data.
 
 Because each design is a separate file, the `data` folder can also live on a shared drive or a synced folder (e.g. OneDrive/SharePoint) so more than one person can use the same design library — a sync conflict then affects at most one design's file, not the whole library. Avoid two people saving the _same_ design at the same time; the app detects that case and asks you to reopen the design rather than overwriting it silently.
 
@@ -56,8 +54,10 @@ To use a different data folder, set `SPN_DATABASE` before starting either app. F
 
 ```powershell
 $env:SPN_DATABASE = "D:\SPN Data\Designs"
-& ".\release\SkidDesignPro-1.0.0-portable.exe"
+& "$env:LOCALAPPDATA\Programs\SkidDesignPro\SkidDesignPro.exe"
 ```
+
+Adjust the executable path if you chose a different installation folder.
 
 ## Equipment settings
 
@@ -82,7 +82,7 @@ Costs start as budget estimates from `backend/config/designConfig.js` and carry 
 
 Quoted lines are fixed; the ±20% range applies only to the lines that are still estimates. Saved designs keep the prices they were generated with. Saving a quote updates costs without changing that design's equipment selection or layout.
 
-The library is stored as `prices.json` in the data folder described above (`backend/db/data` for the web app, `Documents\SkidDesignPro` for the installed app, `data` beside the portable EXE, or `SPN_DATABASE` if set), so copy it whenever you copy that folder. Only prices you have changed are saved; everything else falls back to the config estimate. Deleting `prices.json` resets every price to its estimate.
+The library is stored as `prices.json` in the data folder described above (`backend/db/data` for the web app, `Documents\SkidDesignPro` for the installed app, or `SPN_DATABASE` if set), so copy it whenever you copy that folder. Only prices you have changed are saved; everything else falls back to the config estimate. Deleting `prices.json` resets every price to its estimate.
 
 ## Development
 

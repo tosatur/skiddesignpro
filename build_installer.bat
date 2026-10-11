@@ -13,13 +13,13 @@ echo Installing the locked dependencies...
 call npm.cmd ci
 if errorlevel 1 goto failed
 
-echo Building SkidDesignPro...
-call npm.cmd run build:exe
+echo Building the SkidDesignPro installer...
+call npm.cmd run build:installer
 if errorlevel 1 goto failed
 
 echo.
-echo The installer and portable EXE are ready.
-echo EXE folder: "%~dp0release"
+echo The installer is ready.
+echo Installer folder: "%~dp0release"
 echo Use the Dev Mode switch on the home page to enable developer tools.
 if /i not "%~1"=="--no-pause" pause
 exit /b 0

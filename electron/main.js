@@ -75,7 +75,6 @@ async function startDesktop() {
   databasePath = desktopDatabasePath({
     appPath: app.getAppPath(),
     isPackaged: app.isPackaged,
-    portableDirectory: process.env.PORTABLE_EXECUTABLE_DIR,
     documentsPath: app.getPath("documents"),
     databaseOverride: process.env.SPN_DATABASE,
   });
