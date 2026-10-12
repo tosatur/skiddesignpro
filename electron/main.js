@@ -1,6 +1,6 @@
 import { app, BrowserWindow, dialog, ipcMain, Menu, shell } from "electron";
 import { once } from "node:events";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { basename, dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createApp } from "../backend/app.js";
@@ -154,6 +154,13 @@ async function startDesktop() {
     return result.canceled ? null : openDesignAtPath(result.filePaths[0]);
   });
   ipcMain.handle("design:open-path", (_event, path) => openDesignAtPath(path));
+  ipcMain.handle("design:open-location", (_event, path) => {
+    if (typeof path !== "string" || !path || !existsSync(path))
+      throw new Error(
+        "This design file could not be found. It may have been moved, renamed, or deleted.",
+      );
+    shell.showItemInFolder(path);
+  });
   ipcMain.handle("design:save", (_event, design, path) =>
     saveDesignAtPath(path, design),
   );

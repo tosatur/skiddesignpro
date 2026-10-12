@@ -62,6 +62,15 @@ export default function HomePage({ devMode }) {
     }
   }
 
+  async function openFileLocation(file) {
+    setOpenError("");
+    try {
+      await window.spn.openFileLocation(file.path);
+    } catch (e) {
+      setOpenError(e.message);
+    }
+  }
+
   async function removeFile(file) {
     await window.spn.removeRecentDesign(file.path);
     setAttempt((value) => value + 1);
@@ -161,6 +170,7 @@ export default function HomePage({ devMode }) {
             <RecentDesignsTable
               files={designs}
               onOpen={openFile}
+              onOpenLocation={openFileLocation}
               onRemove={removeFile}
               onDuplicate={duplicateDesign}
               duplicating={duplicating}

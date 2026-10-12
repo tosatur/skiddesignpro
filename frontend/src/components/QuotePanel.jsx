@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { designService } from "../services/designService.js";
 import { money } from "../services/format.js";
 
@@ -14,7 +14,8 @@ function QuoteForm({ line, currency, busy, onSave, onCancel }) {
   const [toLibrary, setToLibrary] = useState(false);
   return (
     <form
-      className="quote-form design-quote-form"
+      className="quote-form"
+      aria-label={`Quote for ${line.name}`}
       onKeyDown={(event) => {
         if (event.key === "Escape") onCancel();
       }}
@@ -24,7 +25,7 @@ function QuoteForm({ line, currency, busy, onSave, onCancel }) {
       }}
     >
       <label>
-        <span>Unit cost ({currency})</span>
+        <span>Quoted unit cost ({currency})</span>
         <input
           type="number"
           min="0"
@@ -164,33 +165,52 @@ export default function QuotePanel({ design, onChanged }) {
             </thead>
             <tbody>
               {cost.lines.map((line) => (
-                <Fragment key={line.id}>
-                  <tr>
-                    <td>{line.name}</td>
-                    <td className="quantity">{line.quantity ?? "—"}</td>
-                    <td className="num">
-                      {line.unitCost == null
-                        ? "-"
-                        : money(line.unitCost, cost.currency)}
-                    </td>
-                    <td className="num cost-amount">
-                      {line.amount == null
-                        ? "-"
-                        : money(line.amount, cost.currency)}
-                    </td>
-                    <td>
-                      <span
-                        className={`status ${line.basis && line.basis !== "estimate" ? "within" : "unknown"}`}
-                      >
-                        {basisLabels[line.basis] ?? "Estimate"}
+                <tr key={line.id}>
+                  <td>{line.name}</td>
+                  <td className="quantity">{line.quantity ?? "—"}</td>
+                  <td className="num">
+                    {line.unitCost == null
+                      ? "-"
+                      : money(line.unitCost, cost.currency)}
+                  </td>
+                  <td className="num cost-amount">
+                    {line.amount == null
+                      ? "-"
+                      : money(line.amount, cost.currency)}
+                  </td>
+                  <td>
+                    <span
+                      className={`status ${line.basis && line.basis !== "estimate" ? "within" : "unknown"}`}
+                    >
+                      {basisLabels[line.basis] ?? "Estimate"}
+                    </span>
+                    {line.quoteRef && (
+                      <span className="muted small quote-ref">
+                        {line.quoteRef}
                       </span>
-                      {line.quoteRef && (
-                        <span className="muted small quote-ref">
-                          {line.quoteRef}
-                        </span>
-                      )}
-                    </td>
-                    <td className="quote-cell">
+                    )}
+                  </td>
+                  <td className="quote-cell">
+                    {editing === line.id ? (
+                      <QuoteForm
+                        line={line}
+                        currency={cost.currency}
+                        busy={busy}
+                        onCancel={() => close(line.id)}
+                        onSave={({ unitCost, quoteRef, toLibrary }) =>
+                          saveOverrides(
+                            line.id,
+                            {
+                              ...overrides,
+                              [line.id]: { unitCost, quoteRef },
+                            },
+                            toLibrary && line.priceKey
+                              ? { key: line.priceKey, unitCost, quoteRef }
+                              : null,
+                          )
+                        }
+                      />
+                    ) : (
                       <div className="quote-actions">
                         {line.quantity != null && (
                           <button
@@ -199,8 +219,6 @@ export default function QuotePanel({ design, onChanged }) {
                             disabled={busy}
                             aria-label={`Enter quote for ${line.name}`}
                             data-quote-line={line.id}
-                            aria-expanded={editing === line.id}
-                            aria-controls={`quote-editor-${line.id}`}
                             onClick={() => setEditing(line.id)}
                           >
                             Enter quote
@@ -218,40 +236,13 @@ export default function QuotePanel({ design, onChanged }) {
                               saveOverrides(line.id, rest, null);
                             }}
                           >
-                            Remove quote
+                            Reset
                           </button>
                         )}
                       </div>
-                    </td>
-                  </tr>
-                  {editing === line.id && (
-                    <tr
-                      className="quote-editor-row"
-                      id={`quote-editor-${line.id}`}
-                    >
-                      <td colSpan={6}>
-                        <QuoteForm
-                          line={line}
-                          currency={cost.currency}
-                          busy={busy}
-                          onCancel={() => close(line.id)}
-                          onSave={({ unitCost, quoteRef, toLibrary }) =>
-                            saveOverrides(
-                              line.id,
-                              {
-                                ...overrides,
-                                [line.id]: { unitCost, quoteRef },
-                              },
-                              toLibrary && line.priceKey
-                                ? { key: line.priceKey, unitCost, quoteRef }
-                                : null,
-                            )
-                          }
-                        />
-                      </td>
-                    </tr>
-                  )}
-                </Fragment>
+                    )}
+                  </td>
+                </tr>
               ))}
             </tbody>
           </table>

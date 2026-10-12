@@ -3,6 +3,7 @@ import { date } from "../services/format.js";
 export default function RecentDesignsTable({
   files,
   onOpen,
+  onOpenLocation,
   onRemove,
   onDuplicate,
   duplicating,
@@ -45,7 +46,16 @@ export default function RecentDesignsTable({
               </td>
               <td>{file.clientName}</td>
               <td className="muted">{date(file.updatedAt)}</td>
-              <td className="muted small">{file.path}</td>
+              <td>
+                <button
+                  type="button"
+                  className="text-button small file-location"
+                  aria-label={`Open file location for ${file.designName}`}
+                  onClick={() => onOpenLocation(file)}
+                >
+                  Open File Location
+                </button>
+              </td>
               <td>
                 <div className="home-design-actions">
                   <button

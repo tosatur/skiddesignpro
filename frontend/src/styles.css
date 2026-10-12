@@ -552,6 +552,10 @@ tbody tr:last-child td {
   max-width: 290px;
   overflow-wrap: anywhere;
 }
+.file-location {
+  padding: 0;
+  white-space: nowrap;
+}
 .saved-table tbody tr {
   cursor: pointer;
 }
@@ -767,7 +771,7 @@ dd {
 .design-table-card th,
 .design-table-card td {
   padding: 11px 12px;
-  vertical-align: middle;
+  vertical-align: top;
 }
 .design-table-card th {
   font-size: 12px;
@@ -932,9 +936,6 @@ dd {
     padding-left: 16px;
     gap: 8px;
   }
-  .header-dev-mode .toggle-status {
-    display: none;
-  }
   .design-equipment-dialog {
     padding: 18px;
   }
@@ -1070,20 +1071,6 @@ dd {
   background: var(--color-surface-alt);
   border-color: var(--color-border);
 }
-.quote-editor-row td {
-  background: var(--color-surface-alt);
-  padding: 18px;
-}
-.design-quote-form {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  max-width: 620px;
-  margin-left: auto;
-  gap: 12px 16px;
-}
-.design-quote-form .quote-library,
-.design-quote-form .quote-actions {
-  grid-column: 1 / -1;
-}
 .cost-totals {
   display: flex;
   flex-wrap: wrap;
@@ -1107,9 +1094,6 @@ dd {
   .design-panel-heading {
     flex-wrap: wrap;
     gap: 4px;
-  }
-  .design-quote-form {
-    grid-template-columns: 1fr;
   }
   .cost-totals {
     justify-content: space-between;

@@ -32,6 +32,7 @@ export default function TestTools({ onImported }) {
   const loadRequest = useRef(0);
   const [open, setOpen] = useState(false);
   const [json, setJson] = useState("");
+  const [inputError, setInputError] = useState("");
   const [exportCount, setExportCount] = useState(null);
   const [listError, setListError] = useState("");
   const [result, setResult] = useState(null);
@@ -44,6 +45,7 @@ export default function TestTools({ onImported }) {
   async function show() {
     if (dialog.current.open) return;
     setResult(null);
+    setInputError("");
     setExportCount(null);
     setListError("");
     setOpen(true);
@@ -87,6 +89,11 @@ export default function TestTools({ onImported }) {
   async function importDesigns(event) {
     event.preventDefault();
     if (working.current) return;
+    if (!json.trim()) {
+      setInputError("Enter design inputs before importing designs.");
+      textarea.current?.focus();
+      return;
+    }
     let inputs;
     try {
       inputs = JSON.parse(json);
@@ -105,6 +112,14 @@ export default function TestTools({ onImported }) {
       });
       return;
     }
+    if (inputs.length === 0) {
+      setInputError(
+        "Add at least one design to the JSON array before importing.",
+      );
+      textarea.current?.focus();
+      return;
+    }
+    setInputError("");
     working.current = true;
     setBusy("import");
     try {
@@ -120,7 +135,20 @@ export default function TestTools({ onImported }) {
   }
 
   async function exportText() {
-    if (working.current || !exportCount) return;
+    if (working.current) return;
+    if (!json.trim()) {
+      setInputError("Enter design inputs before exporting as text.");
+      textarea.current?.focus();
+      return;
+    }
+    if (!exportCount) {
+      setResult({
+        title: "Export failed",
+        message: "No saved designs to export.",
+      });
+      return;
+    }
+    setInputError("");
     working.current = true;
     setBusy("export");
     try {
@@ -250,14 +278,23 @@ export default function TestTools({ onImported }) {
               <textarea
                 id="test-json"
                 ref={textarea}
-                aria-describedby="test-json-help"
+                aria-describedby={`test-json-help${inputError ? " test-json-error" : ""}`}
+                aria-invalid={Boolean(inputError)}
                 rows={10}
                 value={json}
                 placeholder={example}
-                onChange={(event) => setJson(event.target.value)}
+                onChange={(event) => {
+                  setJson(event.target.value);
+                  setInputError("");
+                }}
                 disabled={Boolean(busy)}
                 spellCheck={false}
               />
+              {inputError && (
+                <p id="test-json-error" className="notice error" role="alert">
+                  {inputError}
+                </p>
+              )}
             </div>
           </form>
         )}
@@ -285,7 +322,7 @@ export default function TestTools({ onImported }) {
                   className="button"
                   aria-describedby="test-export-note"
                   onClick={exportText}
-                  disabled={Boolean(busy) || !exportCount}
+                  disabled={Boolean(busy) || exportCount === null}
                 >
                   {busy === "export" ? "Exporting…" : "Export as Text"}
                 </button>

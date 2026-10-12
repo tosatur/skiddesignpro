@@ -5,6 +5,7 @@ const { contextBridge, ipcRenderer } = require("electron");
 contextBridge.exposeInMainWorld("spn", {
   openDesign: () => ipcRenderer.invoke("design:open"),
   openRecentDesign: (path) => ipcRenderer.invoke("design:open-path", path),
+  openFileLocation: (path) => ipcRenderer.invoke("design:open-location", path),
   saveDesign: (design, path) => ipcRenderer.invoke("design:save", design, path),
   saveDesignAs: (design, suggestedName) =>
     ipcRenderer.invoke("design:save-as", design, suggestedName),
