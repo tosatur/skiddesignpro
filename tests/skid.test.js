@@ -170,7 +170,7 @@ test("small and medium skids without cooling fit the container", () => {
 test("design store refuses ids that could leave the data folder", async () => {
   const { DesignStore } = await import("../backend/db/DesignStore.js");
   const store = new DesignStore(":memory:");
-  for (const id of ["../outside/decoy", "..\outside\decoy", "a/b", ""]) {
+  for (const id of ["../outside/decoy", "..\\outside\\decoy", "a/b", ""]) {
     assert.equal(store.get(id), null, id);
     assert.equal(store.delete(id), false, id);
   }
