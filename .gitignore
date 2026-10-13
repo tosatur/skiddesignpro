@@ -19,9 +19,8 @@ node_modules/
 *.db-shm
 *.db-journal
 
-# Local documentation and automated tests
+# Local documentation and Playwright config
 /playwright.config.js
-/tests/
 /docs/
 
 # Generated test reports, screenshots, traces, and coverage
