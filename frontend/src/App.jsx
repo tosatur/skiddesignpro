@@ -90,6 +90,7 @@ function Shell() {
               label="Dev Mode"
               checked={Boolean(devMode)}
               disabled={devMode === null || devModeBusy}
+              showStatus={false}
               onChange={toggleDevMode}
             />
           </div>

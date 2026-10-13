@@ -11,7 +11,11 @@ import { settingsRoutes } from "./routes/settingsRoutes.js";
 
 export function createApp(
   store,
-  { prices = new PriceLibrary(":memory:"), settings = new AppSettings() } = {},
+  {
+    prices = new PriceLibrary(":memory:"),
+    settings = new AppSettings(),
+    onImported,
+  } = {},
 ) {
   const app = express();
   app.disable("x-powered-by");
@@ -50,7 +54,10 @@ export function createApp(
       devMode: settings.get().devMode,
     });
   });
-  app.use("/api/designs", designRoutes(store, { prices, settings }));
+  app.use(
+    "/api/designs",
+    designRoutes(store, { prices, settings, onImported }),
+  );
   app.use("/api/design-tools", designToolsRoutes(prices, settings));
   app.use("/api/prices", priceRoutes(prices));
   app.use("/api/settings", settingsRoutes(settings));

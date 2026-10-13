@@ -178,7 +178,7 @@ export default function PricesPage() {
                                 )
                               }
                             >
-                              Reset to estimate
+                              Reset
                             </button>
                           )}
                         </div>

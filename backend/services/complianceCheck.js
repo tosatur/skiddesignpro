@@ -111,10 +111,13 @@ export function checkTradeWaste(inputs, profile) {
         ? WITHIN
         : sulphur.low > limit.treatmentThreshold
           ? "Treatment Required"
-          : sulphur.low < limit.generalExclusive &&
-              sulphur.high <= limit.treatmentThreshold
-            ? "Potentially Conditional"
-            : "Conditional / Engineering Review Required";
+          : sulphur.low !== sulphur.high &&
+              sulphur.high > limit.treatmentThreshold
+            ? "Review Required — treatment may be required"
+            : sulphur.low < limit.generalExclusive &&
+                sulphur.high <= limit.treatmentThreshold
+              ? "Potentially Conditional"
+              : "Conditional / Engineering Review Required";
     add(
       "sulphur",
       "Total oxidised sulphur",
@@ -124,6 +127,8 @@ export function checkTradeWaste(inputs, profile) {
       limit.reference,
     );
     const row = results.at(-1);
+    if (sulphurStatus === "Review Required — treatment may be required")
+      row.explanation = `The supplied bound permits total oxidised sulphur above ${limit.treatmentThreshold} mg/L as S. Actual concentration is required for final assessment.`;
     if (sulphurStatus === "Potentially Conditional")
       row.explanation = `${inputs.wastewaterProfile === "typical" ? "Reference profile bound" : "Supplied range or bound"} may extend into the conditional range. Actual concentration required for final assessment.`;
     if (usesCalculated)

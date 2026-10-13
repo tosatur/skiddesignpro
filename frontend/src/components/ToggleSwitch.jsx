@@ -4,6 +4,7 @@ export default function ToggleSwitch({
   onChange,
   disabled = false,
   describedBy,
+  showStatus = true,
 }) {
   return (
     <button
@@ -19,9 +20,11 @@ export default function ToggleSwitch({
         if (!disabled) onChange(!checked);
       }}
     >
-      <span className="toggle-status" aria-hidden="true">
-        {checked ? "Enabled" : "Disabled"}
-      </span>
+      {showStatus && (
+        <span className="toggle-status" aria-hidden="true">
+          {checked ? "Enabled" : "Disabled"}
+        </span>
+      )}
       <span className="toggle-track" aria-hidden="true">
         <span className="toggle-thumb" />
       </span>

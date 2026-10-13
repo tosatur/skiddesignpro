@@ -100,7 +100,6 @@ export const designService = {
     forgetDocument(id);
     return { deleted: true };
   },
-  deleteAll: () => request("/designs", { method: "DELETE" }),
   updateEquipment: async (id, revision, equipmentEnabled) => {
     if (!isDesktop())
       return request(`/designs/${id}/equipment`, {

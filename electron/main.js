@@ -1,6 +1,6 @@
 import { app, BrowserWindow, dialog, ipcMain, Menu, shell } from "electron";
 import { once } from "node:events";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { basename, dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createApp } from "../backend/app.js";
@@ -75,17 +75,23 @@ async function startDesktop() {
   databasePath = desktopDatabasePath({
     appPath: app.getAppPath(),
     isPackaged: app.isPackaged,
-    portableDirectory: process.env.PORTABLE_EXECUTABLE_DIR,
     documentsPath: app.getPath("documents"),
     databaseOverride: process.env.SPN_DATABASE,
   });
   store = new DesignStore(databasePath);
   recentFilesPath = join(app.getPath("userData"), "recent-designs.json");
+  const settings = new AppSettings(databasePath);
   const launchPath = designPathFromArgs(process.argv, process.cwd());
   if (launchPath) requestOpen(launchPath);
   server = createApp(store, {
     prices: new PriceLibrary(databasePath),
-    settings: new AppSettings(databasePath),
+    settings,
+    onImported: (design) => {
+      touchRecent(
+        recentFilesPath,
+        recentEntry(join(databasePath, `${design.id}.spnd`), design),
+      );
+    },
   }).listen(0, "127.0.0.1");
   await once(server, "listening");
   const origin = `http://127.0.0.1:${server.address().port}`;
@@ -148,6 +154,13 @@ async function startDesktop() {
     return result.canceled ? null : openDesignAtPath(result.filePaths[0]);
   });
   ipcMain.handle("design:open-path", (_event, path) => openDesignAtPath(path));
+  ipcMain.handle("design:open-location", (_event, path) => {
+    if (typeof path !== "string" || !path || !existsSync(path))
+      throw new Error(
+        "This design file could not be found. It may have been moved, renamed, or deleted.",
+      );
+    shell.showItemInFolder(path);
+  });
   ipcMain.handle("design:save", (_event, design, path) =>
     saveDesignAtPath(path, design),
   );
@@ -172,6 +185,24 @@ async function startDesktop() {
   ipcMain.handle("recent:remove", (_event, path) => {
     removeRecent(recentFilesPath, path);
     return listRecent(recentFilesPath);
+  });
+  ipcMain.handle("reports:save-text", async (_event, text) => {
+    const requireDevMode = () => {
+      if (!settings.get().devMode)
+        throw new Error("Enable Dev Mode on the home page to use this tool.");
+    };
+    requireDevMode();
+    if (typeof text !== "string")
+      throw new Error("Supply report text to export.");
+    const result = await dialog.showSaveDialog(window, {
+      title: "Save report",
+      defaultPath: join(app.getPath("downloads"), "SPN-all-reports.txt"),
+      filters: [{ name: "Text reports", extensions: ["txt"] }],
+    });
+    if (result.canceled || !result.filePath) return { status: "cancelled" };
+    requireDevMode();
+    atomicWriteFile(result.filePath, text);
+    return { status: "saved", path: result.filePath };
   });
 
   Menu.setApplicationMenu(
