@@ -257,7 +257,6 @@ test("the PDF report downloads with a safe filename", async () => {
 test("dev tools need Dev Mode", async () => {
   await setDevMode(false);
   for (const [method, path, body] of [
-    ["DELETE", "/api/designs"],
     ["POST", "/api/designs/import", []],
     ["GET", "/api/designs/reports.txt"],
   ])
@@ -268,7 +267,7 @@ test("dev tools need Dev Mode", async () => {
   assert.equal(invalid.status, 400);
 });
 
-test("bulk import, text export and delete all", async () => {
+test("bulk import and text export", async () => {
   assert.deepEqual((await setDevMode(true)).data, { devMode: true });
   assert.equal((await request("GET", "/api/config")).data.devMode, true);
   try {
@@ -296,14 +295,20 @@ test("bulk import, text export and delete all", async () => {
     assert.equal(summary.data.imported, 2);
     assert.deepEqual(summary.data.skipped, [
       {
+        index: 2,
         designName: "existing",
         reason: "A design with this name already exists.",
       },
     ]);
     assert.deepEqual(
-      summary.data.rejected.map((r) => r.designName),
-      ["Broken", "Entry 4"],
+      summary.data.rejected.map((r) => [r.index, r.designName]),
+      [
+        [3, "Broken"],
+        [4, "Entry 4"],
+      ],
     );
+    assert.deepEqual(summary.data.failed, []);
+    assert.deepEqual(summary.data.warnings, []);
     assert.match(summary.data.rejected[0].reason, /^flowRate: /);
 
     const imported = store.list().find((d) => d.designName === "Exact sulphur");
@@ -320,12 +325,17 @@ test("bulk import, text export and delete all", async () => {
     );
     assert.match(text.data, /Design: Imported/);
     assert.match(text.data, /Design: Existing/);
+    const count = store.list().length;
+    assert.equal(text.headers.get("X-Design-Count"), String(count));
+    assert.equal(
+      text.data.split("\n----------------------------------------\n\n").length,
+      count,
+    );
 
-    const deleted = await request("DELETE", "/api/designs");
-    assert.ok(deleted.data.deleted >= 3);
-    assert.deepEqual((await request("GET", "/api/designs")).data, []);
+    for (const design of store.list()) store.delete(design.id);
     const empty = await request("GET", "/api/designs/reports.txt");
     assert.equal(empty.data, "No saved designs.\n");
+    assert.equal(empty.headers.get("X-Design-Count"), "0");
   } finally {
     await setDevMode(false);
   }

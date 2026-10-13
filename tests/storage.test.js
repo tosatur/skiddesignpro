@@ -73,15 +73,14 @@ test(
 );
 
 test(
-  "designs can be deleted one at a time or all together",
+  "deleting a design removes only its file",
   withTempDir((dir) => {
     const store = new DesignStore(dir);
-    for (const id of ["a", "b", "c"])
+    for (const id of ["a", "b"])
       store.create(design(id, "2026-01-01T00:00:00.000Z"));
     assert.equal(store.delete("a"), true);
     assert.equal(store.delete("a"), false);
-    assert.equal(store.deleteAll(), 2);
-    assert.deepEqual(readdirSync(dir), []);
+    assert.deepEqual(readdirSync(dir), ["b.spnd"]);
   }),
 );
 
@@ -90,8 +89,9 @@ test("the in-memory store behaves like the folder store", () => {
   store.create(design("a", "2026-01-01T00:00:00.000Z"));
   assert.equal(store.get("a").id, "a");
   assert.equal(store.list().length, 1);
-  assert.equal(store.deleteAll(), 1);
+  assert.equal(store.delete("a"), true);
   assert.equal(store.get("a"), null);
+  assert.deepEqual(store.list(), []);
 });
 
 test(
