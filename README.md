@@ -69,6 +69,10 @@ Existing calculated designs retain their saved outputs. On a design page, **Prop
 
 Default equipment choices and Dev Mode are stored in **`settings.json`** in the data folder. They are shared by app instances using that folder and survive restarts. Include this file when copying your app data. Each design's equipment selection is saved inside its own **`.spnd`** file.
 
+## Recent files
+
+In the desktop app, the home page lists up to 15 recently opened or saved designs. **Open File Location** shows the design's `.spnd` file in File Explorer, or reports an error if it has been moved, renamed or deleted. **Remove** takes a design off the list without deleting its file.
+
 ## Duplicate a design
 
 On the home page, choose **Duplicate** beside **Remove** in Recent files, or beside a saved web design. This opens **New design** with all the saved input values filled in, including custom wastewater data, space constraints and design quotes. The design name and client/facility are left blank. Enter those details and choose **Generate Design** to save a separate design; opening the form does not create a design or change the original.
@@ -90,4 +94,16 @@ Run `npm ci` first. `npm run dev` starts the API and Vite with live reload at ht
 
 Application code lives in `frontend/src`, `backend`, `shared` and `electron`. Change reference values in `backend/config/designConfig.js`. Design storage and report logic are shared by the web and desktop versions.
 
-Build output, saved design data, exports, local tests and reference documents are excluded from Git. If the local tests are available, run `npm test` or `npm run test:e2e` to check the app.
+## Tests
+
+Automated tests live in `tests/` and use Node's built-in test runner. Run them after `npm ci`:
+
+```sh
+npm test
+```
+
+They cover input validation, measurements, process and equipment calculations, trade waste compliance, design/price/settings storage, the desktop data folder, the API routes and report exports. The tests use in-memory or temporary storage, so they never touch saved designs.
+
+`npm run test:e2e` runs browser tests with Playwright, but needs a local `playwright.config.js` and test files, which are not in Git.
+
+Build output, saved design data, exports and reference documents are excluded from Git.
